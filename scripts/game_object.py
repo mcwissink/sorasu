@@ -53,5 +53,9 @@ class DynamicObject(GameObject):
                     self.pos -= vec
                     self.rect.x = self.pos.x
                     self.rect.y = self.pos.y
+                    
+                    #correct the velocity based on the vec return --- Nathan Brink
+                    self.vel -= pygame.math.Vector2(physics.normalize(vec)) * physics.dot_product(physics.normalize(vec), self.vel)
+                    
     def draw(self, screen, camera):
         GameObject.draw(self, screen, camera)
