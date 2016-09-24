@@ -20,51 +20,48 @@ http://wiki.roblox.com/index.php?title=2D_Collision_Detection
 
 http://codereview.stackexchange.com/questions/47111/implementation-of-sat-separating-axis-theorem
 http://stackoverflow.com/questions/6013333/separating-axis-theorem-and-python
-vec*vec is the dot product
 '''
-def distance(p1, p2):
-    return math.hypot(p1[0]-p2[0], p1[1]-p2[1])
-
 def collide(entity1, entity2):
+    '''
+    check for collisions between entities and then send resolving vector
+    '''
     overlap = math.inf
     #obtain axis from entity2 assuming entity1 is the player and won't change its rotation
-    axis_list = get_axis(entity2)
+    axis_list = get_axis(entity2.get_corners())
     for axis in axis_list:
         # Project the shapes onto the axis
-        entity1_projection = project(axis, entity1)
-        entity2_projection = project(axis, entity2)
+        entity1_projection = project(axis, entity1.get_corners())
+        entity2_projection = project(axis, entity2.get_corners())
         #test if the projections overlap
-        if not (entity1_projection[1] > entity2_projection[0] and entity1_projection[0] < entity2_projection[1]):
-            return False
-        new_overlap = entity1_projection[1] - entity2_projection[0]
-        if abs(new_overlap) < abs(overlap):
-            overlap = new_overlap
-            current_axis = axis
-        new_overlap = entity1_projection[0] - entity2_projection[1]
-        if abs(new_overlap) < abs(overlap):
-            overlap = new_overlap
-            current_axis = axis
+        for projection in [(entity1_projection[1], entity2_projection[0], 1), (entity2_projection[1], entity1_projection[0], -1)]:
+            p1, p2, sign = projection
+            if not p1 > p2:
+                return False
+            new_overlap = sign*(p1 - p2)
+            if abs(new_overlap) < abs(overlap):
+                overlap = new_overlap
+                current_axis = axis
     mtv = (current_axis[0]*overlap, current_axis[1]*overlap)
     return mtv
-def get_axis(entity):
+def get_axis(corners):
     '''
     gets all the axis necessary for collision
     '''
     axis = []
-    for i in range(len(entity.corners)):
+    for i in range(len(corners)):
         #create axis and make it perpendicular to face
-        vec = (entity.corners[i][0] - entity.corners[i-1][0], entity.corners[i][1] - entity.corners[i-1][1])
+        vec = (corners[i][0] - corners[i-1][0], corners[i][1] - corners[i-1][1])
         vec = normalize(perpendicular(vec))
         axis.append(vec)
     return axis
-def project(axis, entity):
+def project(axis, corners):
     '''
     project the points on the axis
     '''
-    min_point = dot_product(entity.corners[0], axis)
+    min_point = dot_product(corners[0], axis)
     max_point = min_point
-    for i in range(len(entity.corners)):
-        p = dot_product(entity.corners[i], axis)
+    for i in range(len(corners)):
+        p = dot_product(corners[i], axis)
         if (p < min_point):
             min_point = p
         elif (p > max_point):

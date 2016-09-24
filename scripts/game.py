@@ -17,14 +17,14 @@ class GameState():
         initiate the game
         '''
         pygame.mouse.set_visible(False) # Make the mouse invisible
-        self.player = Player(50, -50, 50, 50,(255,255,0), 'rect')
+        self.player = Player(50, -50, 50, 50,(255,255,0))
         self.backGroundEntities = [] #scenery and other things that don't collide
         self.gameEntities = [self.player] #blocks and other objects that collide
         self.foreGroundEntities = [] #scenery and other things that don't collide
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
         self.camera = Camera(900, 600, self.player)
         for i in range(1):
-            test = game_object.StaticObject(100, 100, 50, 50,(0,225,0), 'rect')
+            test = game_object.StaticObject(100, 100, 100, 100,(0,225,0))
             self.gameEntities.append(test)
     def eventHandler(self, event):
         '''

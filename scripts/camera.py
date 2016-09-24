@@ -10,14 +10,14 @@ class Camera(object):
     create a viewport for the game
     '''
     def __init__(self, width, height, target): #http://stackoverflow.com/questions/14354171/add-scrolling-to-a-platformer-in-pygame/14357169#14357169
-        self.viewport = pygame.Rect(target.x, target.y, width, height)
+        self.viewport = pygame.Rect(target.rect.x, target.rect.y, width, height)
         self.target = target
     def apply(self, entity):
         '''
         applies camera logic to entities
         '''
-        position_x = entity.x - self.viewport.x
-        position_y = entity.y - self.viewport.y
+        position_x = entity.rect.x - self.viewport.x
+        position_y = entity.rect.y - self.viewport.y
         return (position_x, position_y)
     def update(self):
         '''
