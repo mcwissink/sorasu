@@ -4,15 +4,15 @@ Runs the game
 @author: Mark Wissink (mcw33)
 '''
 
-''''
+'''
 http://www.pygame.org/projects/9/108/
-''''
+'''
 import pygame, os, sys
 from game import GameState
 
 def main():
     #http://thepythongamebook.com/en:pygame:step006
-    #set up the game and run the main loop
+    #set up the game and run the main loop`
     #os.environ['SDL_VIDEO_CENTERED'] = '1' #center window on the screen
     pygame.init() #initiate pygame
     screen = pygame.display.set_mode((900, 600), pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.RESIZABLE)

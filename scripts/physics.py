@@ -22,67 +22,76 @@ http://codereview.stackexchange.com/questions/47111/implementation-of-sat-separa
 http://stackoverflow.com/questions/6013333/separating-axis-theorem-and-python
 vec*vec is the dot product
 '''
+def distance(p1, p2):
+    return math.hypot(p1[0]-p2[0], p1[1]-p2[1])
+
 def collide(entity1, entity2):
-        edges = entity1._edges + entity2._edges
-        # The edges to test against for an axis of separation
-        _norm = geo.normalize
-        _perp = geo.perpendicular
-        # I store all the functions I need in local variables so
-        # python doesn't have to keep re-evaluating their positions
-        # in the for loop.
+    overlap = math.inf
+    #obtain axis from entity2 assuming entity1 is the player and won't change its rotation
+    axis_list = get_axis(entity2)
+    for axis in axis_list:
+        # Project the shapes onto the axis
+        entity1_projection = project(axis, entity1)
+        entity2_projection = project(axis, entity2)
+        #test if the projections overlap
+        if not (entity1_projection[1] > entity2_projection[0] and entity1_projection[0] < entity2_projection[1]):
+            return False
+        new_overlap = entity1_projection[1] - entity2_projection[0]
+        if abs(new_overlap) < abs(overlap):
+            overlap = new_overlap
+            current_axis = axis
+        new_overlap = entity1_projection[0] - entity2_projection[1]
+        if abs(new_overlap) < abs(overlap):
+            overlap = new_overlap
+            current_axis = axis
+    mtv = (current_axis[0]*overlap, current_axis[1]*overlap)
+    return mtv
+def get_axis(entity):
+    '''
+    gets all the axis necessary for collision
+    '''
+    axis = []
+    for i in range(len(entity.corners)):
+        #create axis and make it perpendicular to face
+        vec = (entity.corners[i][0] - entity.corners[i-1][0], entity.corners[i][1] - entity.corners[i-1][1])
+        vec = normalize(perpendicular(vec))
+        axis.append(vec)
+    return axis
+def project(axis, entity):
+    '''
+    project the points on the axis
+    '''
+    min_point = dot_product(entity.corners[0], axis)
+    max_point = min_point
+    for i in range(len(entity.corners)):
+        p = dot_product(entity.corners[i], axis)
+        if (p < min_point):
+            min_point = p
+        elif (p > max_point):
+            max_point = p
+    projection = (min_point, max_point)
+    return projection
 
-        entity1_coords = entity1.coordinates
-        entity2_coords = entity2.coordinates
-
-        project_entity1 = entity1._project
-        project_entity2 = entity2._project
-
-        projections = [] # A list of projections in case there is a collision.
-        # We can use the projections to find the minimum translation vector.
-        append_projection = projections.append
-
-        for edge in edges:
-            edge = _norm(edge)
-            # Calculate the axis to project the shapes onto
-            axis = _perp(edge)
-
-            # Project the shapes onto the axis
-            entity1_projection = project_entity1(axis, entity1_coords)
-            entity2_projection = project_entity2(axis, entity2_coords)
-
-            if not (entity1_projection[1] > entity2_projection[0] and \
-                    entity1_projection[0] < entity2_projection[1]     ): # Intersection test
-                # Break early if an axis has been found.
-                return False
-            overlap = entity1_projection[1] - entity2_projection[0]
-            append_projection((
-                axis[0] * overlap,
-                axis[1] * overlap
-                )) # Append the projection to the list of projections if it occurs
-        return projections
-
-def normalize(vector):
-    """
-    Normalize a given vector.
-    """
-    # Average time: 9.633639630529273e-07s
-    x, y = vector
-    magnitude = 1/math.sqrt(x*x + y*y)
-    return magnitude*x, magnitude*y
-
-def perpendicular(vector):
-    """
+def perpendicular(vec):
+    '''
     Return the perpendicular vector.
-    """
-    # Average time: 2.1031882874416398e-07s
-    x, y = vector
-    return y, -x
+    '''
+    new_vec = (vec[1], -vec[0])
+    return new_vec
 
-def dot_product(v1, v2):
-    """
+def dot_product(vec1, vec2):
+    '''
     Calculate the dot product of two vectors.
-    """
-    # Average time: 2.617608074634745e-07s
-    x1, y1 = v1
-    x2, y2 = v2
+    '''
+    x1, y1 = vec1
+    x2, y2 = vec2
     return x1*x2 + y1*y2
+
+def normalize(vec):
+    '''
+    Normalize a given vector.
+    '''
+    # Average time: 9.633639630529273e-07s
+    x, y = vec
+    magnitude = 1/math.hypot(x, y)
+    return magnitude*x, magnitude*y

@@ -19,9 +19,8 @@ class GameObject(object):
         self.dynamic = False
         self.mask = mask
         self.rect = pygame.Rect(x, y, width, height)
-        self.corners = [self.rect.topleft, self.rect.topright, self.rect.bottomleft, self.rect.bottomright]
+        self.corners = [self.rect.topright, self.rect.bottomright, self.rect.bottomleft]
     def update(self, dt):
-        self.corners = [self.rect.topleft, self.rect.topright, self.rect.bottomleft, self.rect.bottomright]
         self.rect.x = self.x
         self.rect.y = self.y
     def draw(self, screen, camera):
@@ -45,13 +44,18 @@ class DynamicObject(GameObject):
         self.vel = pygame.math.Vector2(0,0)
         self.old_vel = pygame.math.Vector2(0,0)
         self.pos = pygame.math.Vector2(x,y)
-        self.grounded = 0
+        self.fric = pygame.math.Vector2(0.01,0.01)
     def update(self, dt, entities):
+        #update the corners array
+        self.corners = [self.rect.topleft, self.rect.topright, self.rect.bottomright, self.rect.bottomleft]
         self.pos += (self.old_vel + self.vel) * 0.5 * dt
-        self.grounded = 0
         for entity in entities:
-            if physics.collide(self, entity):
-                print('collision')
+            if entity != self:
+                vec = physics.collide(self, entity)
+                if vec:
+                    self.pos -= vec
+                    self.vel *= 0
+                    print(vec)
         self.x = self.pos.x
         self.y = self.pos.y
         GameObject.update(self, dt)
