@@ -6,61 +6,36 @@ contains game logic and draw calls
 
 import pygame, sys
 import math
-import random
-import game_object
 import button
-from camera import Camera
-from player import Player
 
-class GameState():
+class MenuState():
     def __init__(self):
         '''
         initiate the game
         '''
-        self.switch_state = 0
-        pygame.mouse.set_visible(False) # Make the mouse invisible
-        self.player = Player(310, -50, 50, 50,(255,0,0))
-        self.buttons = [] #containter for buttons
-        self.backGroundEntities = [] #scenery and other things that don't collide
-        self.gameEntities = [self.player] #blocks and other objects that collide
-        self.foreGroundEntities = [] #scenery and other things that don't collide
+        self.switch_state = None
+        self.buttonTest = button.Button(10, 10, 200, 50, (0, 0, 0), 'Play')
+        self.buttonTest.onClick = button.changeState()
+        self.buttons = [self.buttonTest] #containter for buttons
+        pygame.mouse.set_visible(True) # Make the mouse invisible
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
-        self.camera = Camera(900, 600, self.player)
-        for i in range(10):
-            test = game_object.StaticObject(random.randint(0, 1000), random.randint(0, 1000), 1000, 100,(0,225,0))
-            self.gameEntities.append(test)
+    
     def update(self, dt):
         '''
         loop through objects and run logic
         '''
         #send key inputs to player
-        self.player.input(self.keys, dt)
-        for entity in self.backGroundEntities:
-            entity.update(dt)
-        for entity in self.gameEntities:
-            if (entity.dynamic):
-                entity.update(dt, self.gameEntities)
-            else:
-                entity.update(dt)
-        for entity in self.foreGroundEntities:
-            entity.update(dt)
-        self.camera.update(self.keys, dt)
     def draw(self, draw, screen):
         '''
         loop through objects and draw them
         '''
         screen.fill(pygame.Color(255, 255, 255))
-        for entity in self.backGroundEntities:
-            entity.draw(screen, self.camera)
-        for entity in self.gameEntities:
-            entity.draw(screen, self.camera)
-        for entity in self.foreGroundEntities:
-            entity.draw(screen, self.camera)
         for entity in self.buttons:
             entity.draw(screen)
+        
     def eventHandler(self, event):
         '''
-        handles keyboard events
+        handles user inputs
         '''
         #check for key down
         if event.type == pygame.KEYDOWN:
@@ -89,8 +64,8 @@ class GameState():
         if event.type == pygame.MOUSEBUTTONUP:
             pygame.mouse.current_button = self.checkButtons(pygame.mouse.get_pos())
             if pygame.mouse.last_click == pygame.mouse.current_button and pygame.mouse.current_button != None:
-                pygame.mouse.current_button.onClick(self.switch_state, MenuState())
-        
+                self.switch_state = pygame.mouse.current_button.onClick(self.switch_state, GameState)
+    
     def checkButtons(self, mouse):
         '''
         loop throgh all the buttons and check if clicked

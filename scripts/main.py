@@ -9,6 +9,8 @@ http://www.pygame.org/projects/9/108/
 '''
 import pygame, os, sys
 from game import GameState
+from menu import MenuState
+from editor import EditorState
 
 def main():
     #http://thepythongamebook.com/en:pygame:step006
@@ -17,14 +19,14 @@ def main():
     pygame.init() #initiate pygame
     screen = pygame.display.set_mode((900, 600), pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.RESIZABLE)
     clock = pygame.time.Clock() #initiates clock for time usage, such as deltatime and fps
-    frameRate = 60
+    frameRate = 0
     pygame.display.set_caption('Sorasu') #set the title of the application
     #pygame.display.set_icon(util.load('icon.png')) #set the icon of the application
     currentState = GameState()
     
     #main game loop
     while True:
-        deltaTime = clock.tick(frameRate)/100.0 #get time pasted between each frame in seconds
+        deltaTime = clock.tick(frameRate)/1000.0 #get time pasted between each frame in seconds
         for event in pygame.event.get():
             if event.type == pygame.QUIT: #if the application is closed - terminate all processes
                 pygame.quit()
@@ -32,7 +34,8 @@ def main():
                 return
             elif event.type == pygame.VIDEORESIZE: #if screen is resized
                 screen = pygame.display.set_mode(event.dict['size'],pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.RESIZABLE)
-                currentState.camera.resize(screen)      
+                if hasattr(currentState, 'camera'):
+                    currentState.camera.resize(screen)     
             else:
                 currentState.eventHandler(event)
         currentState.draw(pygame.draw, screen)

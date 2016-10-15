@@ -10,21 +10,43 @@ class Camera(object):
     create a viewport for the game
     '''
     def __init__(self, width, height, target): #http://stackoverflow.com/questions/14354171/add-scrolling-to-a-platformer-in-pygame/14357169#14357169
-        self.viewport = pygame.Rect(target.rect.x, target.rect.y, width, height)
+        self.viewport = pygame.Rect(0, 0, width, height)
         self.target = target
-    def apply(self, entity):
+    def apply(self, position):
         '''
         applies camera logic to entities
         '''
-        position_x = entity.rect.x - self.viewport.x
-        position_y = entity.rect.y - self.viewport.y
+        position_x = position[0] - self.viewport.x
+        position_y = position[1] - self.viewport.y
         return (position_x, position_y)
-    def update(self):
+    
+    def apply_inverse(self, mouse):
+        '''
+        applies camera logic to entities
+        '''
+        position_x = mouse[0] + self.viewport.x
+        position_y = mouse[1] + self.viewport.y
+        return (position_x, position_y)
+    
+    def update(self, keys, dt):
         '''
         updates camera position
         '''
-        self.viewport.centerx = self.target.rect.centerx 
-        self.viewport.centery = self.target.rect.centery
+        if self.target == 'free':
+            '''Left and right movement'''
+            if keys['right'] and not keys['left']: # Right movement
+                self.viewport.centerx += 1000 * dt
+            elif keys['left'] and not keys['right']: # Left movement
+                self.viewport.centerx -= 1000 * dt
+            '''Up and down movement'''
+            if keys['up'] and not keys['down']: # Jump, wall jump 
+                self.viewport.centery -= 1000 * dt
+            elif keys['down'] and not keys['up']: # Fall faster when user is pressing down
+                self.viewport.centery += 1000 * dt
+        else:
+            self.viewport.centerx = self.target.rect.centerx 
+            self.viewport.centery = self.target.rect.centery
+
     def resize(self, screen):
         '''
         resizes the camera
