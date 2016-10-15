@@ -6,7 +6,9 @@ contains game logic and draw calls
 
 import pygame, sys
 import math
-import button
+from button import Button
+from game import GameState
+from editor import EditorState
 
 class MenuState():
     def __init__(self):
@@ -14,12 +16,18 @@ class MenuState():
         initiate the game
         '''
         self.switch_state = None
-        self.buttonTest = button.Button(10, 10, 200, 50, (0, 0, 0), 'Play')
-        self.buttonTest.onClick = button.changeState()
-        self.buttons = [self.buttonTest] #containter for buttons
         pygame.mouse.set_visible(True) # Make the mouse invisible
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
-    
+        #create buttons
+        self.gameButton = Button(100, 100, 100, 100, (255,0,0), 'Game')
+        def onGameClick():
+            return GameState()
+        self.gameButton.onClick = onGameClick
+        self.editorButton = Button(100, 300, 100, 100, (255,0,0), 'Editor')
+        def onEditorClick():
+            return EditorState()
+        self.editorButton.onClick = onEditorClick
+        self.buttons = [self.gameButton, self.editorButton] #containter for buttons
     def update(self, dt):
         '''
         loop through objects and run logic
@@ -57,6 +65,10 @@ class MenuState():
                 self.keys['left'] = False
             if event.key == pygame.K_RIGHT:
                 self.keys['right'] = False
+            if event.key == pygame.K_1:
+                return GameState()
+            if event.key == pygame.K_2:
+                return EditorState()
         #check if mouse downs
         if event.type == pygame.MOUSEBUTTONDOWN:
             pygame.mouse.last_click = self.checkButtons(pygame.mouse.get_pos())
@@ -64,7 +76,7 @@ class MenuState():
         if event.type == pygame.MOUSEBUTTONUP:
             pygame.mouse.current_button = self.checkButtons(pygame.mouse.get_pos())
             if pygame.mouse.last_click == pygame.mouse.current_button and pygame.mouse.current_button != None:
-                self.switch_state = pygame.mouse.current_button.onClick(self.switch_state, GameState)
+                return pygame.mouse.current_button.onClick()
     
     def checkButtons(self, mouse):
         '''

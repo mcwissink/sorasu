@@ -23,20 +23,27 @@ class EditorState():
         self.backGroundEntities = [] #scenery and other things that don't collide
         self.gameEntities = [] #blocks and other objects that collide
         self.foreGroundEntities = [] #scenery and other things that don't collide
-        self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
+        self.keys = {'up': False, 'down': False, 'left': False, 'right': False, 'ctrl': False} #dictionary for key presses
         self.camera = Camera(900, 600, 'free')
         #drawing variables
-        self.init_mouse_x = self.init_mouse_y = 0
+        self.init_pos = (0, 0)
         self.current_draw = None
         self.end_draw = False
     def update(self, dt):
         '''
         loop through objects and run logic
-        '''
+        '''      
+        #update the current draw
         if self.end_draw:
-            mouse = self.camera.apply_inverse(pygame.mouse.get_pos())
-            self.current_draw.rect.size = (mouse[0] - self.init_mouse_x, mouse[1] - self.init_mouse_y)
+            #snap to corner
+            if self.keys['ctrl']:
+                position = self.snap_to_corner(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)
+            else:
+                position = self.camera.apply_inverse(pygame.mouse.get_pos())
+            self.current_draw.rect.size = (position[0] - self.init_pos[0], position[1] - self.init_pos[1])
         self.camera.update(self.keys, dt)
+        
+        
         
     def draw(self, draw, screen):
         '''
@@ -66,6 +73,8 @@ class EditorState():
                 self.keys['left'] = True
             if event.key == pygame.K_d:
                 self.keys['right'] = True
+            if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
+                self.keys['ctrl'] = True
         #check if for key up
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
@@ -76,16 +85,22 @@ class EditorState():
                 self.keys['left'] = False
             if event.key == pygame.K_d:
                 self.keys['right'] = False
+            if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
+                self.keys['ctrl'] = False
         #check if mouse downs
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            self.init_mouse_x, self.init_mouse_y = self.camera.apply_inverse(pygame.mouse.get_pos())
+        if event.type == pygame.MOUSEBUTTONDOWN:    
+            if self.keys['ctrl']:
+                self.init_pos = self.snap_to_corner(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)
+            else:
+                self.init_pos = self.camera.apply_inverse(pygame.mouse.get_pos())
             pygame.mouse.last_click = self.checkButtons(pygame.mouse.get_pos())
             if not self.end_draw:
-                draw_entity = game_object.StaticObject(self.init_mouse_x, self.init_mouse_y, 0, 0,(0,0,0))
+                #setup a new draw
+                draw_entity = game_object.StaticObject(self.init_pos[0], self.init_pos[1], 0, 0,(0,0,0))
                 self.current_draw = draw_entity
                 self.gameEntities.append(draw_entity)
                 self.end_draw = True
-            else:
+            else: 
                 self.end_draw = False
         #check if mouse up
         if event.type == pygame.MOUSEBUTTONUP:
@@ -98,3 +113,17 @@ class EditorState():
         for button in self.buttons:
             if button.rect.collidepoint(mouse):
                 return button
+    def snap_to_corner(self, position, entity_list):
+        '''
+        snaps position to the nearest corner
+        '''
+        min_dist = math.inf
+        closest_pos = position
+        for entity in entity_list:
+            if entity != self.current_draw:
+                for point in entity.get_corners():
+                    dist = math.hypot(position[0] - point[0], position[1] - point[1]) 
+                    if dist < min_dist:
+                        min_dist = dist
+                        closest_pos = point
+        return closest_pos

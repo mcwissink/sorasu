@@ -19,7 +19,7 @@ class GameObject(object):
         pass
     def draw(self, screen, camera):
         position = camera.apply((self.rect.x, self.rect.y))
-        #pygame.draw.polygon(screen, self.color, [camera.apply(self.points[0]), camera.apply(self.points[1]), camera.apply(self.points[2])], 0)
+        #pygame.draw.polygon(screen, self.color, [camera.apply(self.rect.topleft), camera.apply(self.rect.topright), camera.apply(self.rect.bottomright)], 0)
         pygame.draw.rect(screen, self.color, (position[0], position[1], self.rect.width, self.rect.height))
     def get_corners(self):
         return [self.rect.topleft, self.rect.topright, self.rect.bottomright, self.rect.bottomleft]

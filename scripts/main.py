@@ -22,7 +22,7 @@ def main():
     frameRate = 0
     pygame.display.set_caption('Sorasu') #set the title of the application
     #pygame.display.set_icon(util.load('icon.png')) #set the icon of the application
-    currentState = GameState()
+    currentState = MenuState()
     
     #main game loop
     while True:
@@ -37,7 +37,7 @@ def main():
                 if hasattr(currentState, 'camera'):
                     currentState.camera.resize(screen)     
             else:
-                currentState.eventHandler(event)
+                currentState = currentState.eventHandler(event) or currentState
         currentState.draw(pygame.draw, screen)
         currentState.update(deltaTime)   
         pygame.display.flip() #updates the screen
