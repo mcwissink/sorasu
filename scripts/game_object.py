@@ -16,8 +16,6 @@ class GameObject(object):
         self.offsets = offsets
         self.select_offset = (0, 0) #used for dragging
         '''fix this because x and y dont update'''
-        self.x = x
-        self.y = y
         #this is a collision bounding box set in the editor script
         self.rect = pygame.Rect(x ,y ,0 , 0)
     def update(self, dt):
@@ -27,11 +25,12 @@ class GameObject(object):
         translate_points = camera.apply(self.get_corners())
         pygame.draw.polygon(screen, self.color, translate_points, 0)
     def debug_draw(self, screen, camera):
-        #translates points and draws polygon
-        pygame.draw.rect(screen, (255,0,0), self.rect, 2)
+        #translates points and draws rect
+        position = camera.apply_single((self.rect.x, self.rect.y))
+        pygame.draw.rect(screen, (255,0,0), (position[0], position[1], self.rect.width, self.rect.height), 2)
     def get_corners(self):
         '''apply offsets from x and y'''
-        return [(self.x + offset[0], self.y + offset[1]) for offset in self.offsets]
+        return [(self.rect.x + offset[0], self.rect.y + offset[1]) for offset in self.offsets]
 
 #includes any objects that are simply scenery
 class StaticObject(GameObject):

@@ -30,6 +30,7 @@ class EditorState():
         self.snap_to = (0, 0)
         self.line_to = [(0, 0), (0, 0)]
         self.init_pos = (0, 0)
+        self.origin = (0, 0)
         self.current_draw = None
         self.continue_draw = False
         self.draw_type = 0
@@ -55,11 +56,13 @@ class EditorState():
             #snap to corner
             if self.keys['ctrl']:
                 position = self.snap_to
+            #snap to plane
             elif self.keys['shift']:
                 position = self.line_to[1]
             else:
                 position = self.camera.apply_inverse(pygame.mouse.get_pos())
-            self.current_draw.offsets = self.calculate_offset(self.init_pos, position)
+            self.current_draw.rect.size = (position[0] - self.origin[0], position[1] - self.origin[1])
+            self.current_draw.offsets = self.calculate_offset(self.init_pos, position, self.current_draw.rect)
         self.camera.update(self.keys, dt)
         
     def draw(self, draw, screen):
@@ -88,7 +91,8 @@ class EditorState():
         if self.keys['shift']:
             pygame.draw.line(screen, (255,0,0), self.camera.apply_single(self.line_to[0]), self.camera.apply_single(self.line_to[1]), 2)
         if pygame.mouse.get_pressed()[0] and self.tool == 2 and not self.drag:
-            pygame.draw.rect(screen, (255,0,0), self.selector_rect, 2)
+            position = self.camera.apply_single((self.selector_rect.x, self.selector_rect.y))
+            pygame.draw.rect(screen, (255,0,0), (position[0], position[1], self.selector_rect.width, self.selector_rect.height), 2)
     def eventHandler(self, event):
         '''
         handles user inputs
@@ -134,38 +138,54 @@ class EditorState():
             if event.key == pygame.K_8:
                 self.draw_type = 0
         #check if mouse downs
-        if event.type == pygame.MOUSEBUTTONDOWN:   
+        if event.type == pygame.MOUSEBUTTONDOWN:
             #creates things 
             if pygame.mouse.get_pressed()[0]:
+                self.init_pos = self.camera.apply_inverse(pygame.mouse.get_pos())
                 if self.tool == 0:
                     if self.keys['ctrl']:
                         self.init_pos = self.snap_to_corner(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)
                     elif self.keys['shift']:
-                        self.init_pos = self.snap_to_plane(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)[1]
-                    else:
-                        self.init_pos = self.camera.apply_inverse(pygame.mouse.get_pos())
+                        self.init_pos = self.snap_to_plane(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)[1] 
                     pygame.mouse.last_click = self.checkButtons(pygame.mouse.get_pos())
                     if not self.continue_draw:
                         #setup a new draw
-                        draw_entity = game_object.StaticObject(self.init_pos[0], self.init_pos[1], [(1,1),(-1,1),(-1,-1),(1,-1)], (0,0,0))
+                        self.origin = self.init_pos
+                        draw_entity = game_object.StaticObject(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], (0,0,0))
                         self.current_draw = draw_entity
                         self.gameEntities.append(draw_entity)
                         self.continue_draw = True
                     else:
+                        #finish draw
+                        '''
                         x_list = [offset_x[0] for offset_x in self.current_draw.offsets]
                         y_list = [offset_y[1] for offset_y in self.current_draw.offsets]
-                        self.current_draw.rect = pygame.Rect(self.current_draw.x+min(x_list), self.current_draw.y+min(y_list), max(x_list) - min(x_list), max(y_list) - min(y_list))
+                        self.current_draw.rect = pygame.Rect(self.current_draw.origin[0]+min(x_list), self.current_draw.origin[1]+min(y_list), max(x_list) - min(x_list), max(y_list) - min(y_list))
+                        '''
+                        #snap to corner
+                        if self.keys['ctrl']:
+                            position = self.snap_to
+                        #snap to plane
+                        elif self.keys['shift']:
+                            position = self.line_to[1]
+                        else:
+                            position = self.camera.apply_inverse(pygame.mouse.get_pos())
+                        self.current_draw.rect.normalize()
+                        self.current_draw.offsets = self.calculate_offset(self.origin, position, self.current_draw.rect)
+                        print(self.current_draw.rect)
                         self.current_draw = None
                         self.continue_draw = False
                 if self.tool == 2:
-                    self.init_pos = self.camera.apply_inverse(pygame.mouse.get_pos())
                     for entity in self.selected:
                         if entity.rect.collidepoint(self.init_pos):
                             self.drag = True
                     if not self.drag:
                         self.selector_rect.x = self.init_pos[0]
                         self.selector_rect.y = self.init_pos[1]
-                                
+                    else:
+                        for entity in self.selected:
+                            entity.select_offset = (entity.rect.x - self.init_pos[0], entity.rect.y - self.init_pos[1])
+                               
         #check if mouse up
         if event.type == pygame.MOUSEBUTTONUP:
             pygame.mouse.current_button = self.checkButtons(pygame.mouse.get_pos())
@@ -187,13 +207,17 @@ class EditorState():
         #deletes things
         if pygame.mouse.get_pressed()[0]:
             if self.tool == 1:
-                self.delete_object(self.camera.apply_single(pygame.mouse.get_pos()), self.gameEntities)
+                self.delete_object(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)
             if self.tool == 2:
                 position = self.camera.apply_inverse(pygame.mouse.get_pos())
                 if not self.drag:
+                    #resize the selection box
                     self.selector_rect.size = (position[0] - self.init_pos[0], position[1] - self.init_pos[1])
                 else:
-                    pass
+                    #drag objects around
+                    for entity in self.selected:
+                        entity.rect.x = position[0] + entity.select_offset[0]
+                        entity.rect.y = position[1] + entity.select_offset[1]
     def checkButtons(self, mouse):
         '''
         loop throgh all the buttons and check if clicked
@@ -201,14 +225,30 @@ class EditorState():
         for button in self.buttons:
             if button.rect.collidepoint(mouse):
                 return button
-    def calculate_offset(self, origin, position):
+    def calculate_offset(self, origin, position, rect):
         '''
         calculates the necessary offsets for a shape
         '''
+        #corrects offsets for negative rectangle values
+        h = 1
+        v = 1
+        if origin[0] == rect.topright[0]:
+            h = -1
+        if origin[1] == rect.bottomleft[1]:
+            v = -1
+        point_list = [(0,0), (0, v*(position[1]-origin[1])), (h*(position[0]-origin[0]), v*(position[1]-origin[1])), (h*(position[0]-origin[0]), 0)]
         if self.draw_type == 0:
-            return [(0,0), (0, position[1]-origin[1]), (position[0]-origin[0], position[1]-origin[1]), (position[0]-origin[0], 0)]
+            return point_list
         elif self.draw_type == 1:
-            return [(0,0), (position[0]-origin[0], position[1]-origin[1]), (position[0]-origin[0], 0)]
+            if origin == rect.topleft:
+                point_list.pop(1)
+            elif origin == rect.topright:
+                point_list.pop(2)
+            elif origin == rect.bottomleft:
+                point_list.pop(0)
+            else:
+                point_list.pop(3)
+            return point_list
     def snap_to_corner(self, position, entity_list):
         '''
         snaps position to the nearest corner
