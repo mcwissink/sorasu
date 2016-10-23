@@ -65,10 +65,6 @@ class MenuState():
                 self.keys['left'] = False
             if event.key == pygame.K_RIGHT:
                 self.keys['right'] = False
-            if event.key == pygame.K_1:
-                return GameState()
-            if event.key == pygame.K_2:
-                return EditorState()
         #check if mouse downs
         if event.type == pygame.MOUSEBUTTONDOWN:
             pygame.mouse.last_click = self.checkButtons(pygame.mouse.get_pos())

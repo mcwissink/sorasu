@@ -19,16 +19,14 @@ class GameState():
         '''
         self.switch_state = 0
         pygame.mouse.set_visible(False) # Make the mouse invisible
-        self.player = Player(310, -50, 50, 50,(255,0,0))
+        self.player = Player(100, -100, [(10,10),(-10,10),(-10,-10),(10,-10)], (255,0,0))
+        test1 = game_object.StaticObject(-10, 0, [(100,100),(-10,10),(-100,-10),(10,-10)], (0,225,0))
         self.buttons = [] #containter for buttons
         self.backGroundEntities = [] #scenery and other things that don't collide
-        self.gameEntities = [self.player] #blocks and other objects that collide
+        self.gameEntities = [self.player, test1] #blocks and other objects that collide
         self.foreGroundEntities = [] #scenery and other things that don't collide
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
         self.camera = Camera(900, 600, self.player)
-        for i in range(10):
-            test = game_object.StaticObject(random.randint(0, 1000), random.randint(0, 1000), 1000, 100,(0,225,0))
-            self.gameEntities.append(test)
     def update(self, dt):
         '''
         loop through objects and run logic

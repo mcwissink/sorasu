@@ -10,32 +10,42 @@ import physics
 
 #base class for all object in game
 class GameObject(object):
-    def __init__(self, x, y, width, height, color):
+    def __init__(self, x, y, offsets, color):
         self.color = color
         self.dynamic = False
-        #this is a collision bounding box
-        self.rect = pygame.Rect(x, y, width, height)
+        self.offsets = offsets
+        self.select_offset = (0, 0) #used for dragging
+        '''fix this because x and y dont update'''
+        self.x = x
+        self.y = y
+        #this is a collision bounding box set in the editor script
+        self.rect = pygame.Rect(x ,y ,0 , 0)
     def update(self, dt):
         pass
     def draw(self, screen, camera):
-        position = camera.apply((self.rect.x, self.rect.y))
-        #pygame.draw.polygon(screen, self.color, [camera.apply(self.rect.topleft), camera.apply(self.rect.topright), camera.apply(self.rect.bottomright)], 0)
-        pygame.draw.rect(screen, self.color, (position[0], position[1], self.rect.width, self.rect.height))
+        #translates points and draws polygon
+        translate_points = camera.apply(self.get_corners())
+        pygame.draw.polygon(screen, self.color, translate_points, 0)
+    def debug_draw(self, screen, camera):
+        #translates points and draws polygon
+        pygame.draw.rect(screen, (255,0,0), self.rect, 2)
     def get_corners(self):
-        return [self.rect.topleft, self.rect.topright, self.rect.bottomright, self.rect.bottomleft]
+        '''apply offsets from x and y'''
+        return [(self.x + offset[0], self.y + offset[1]) for offset in self.offsets]
+
 #includes any objects that are simply scenery
 class StaticObject(GameObject):
-    def __init__(self, x, y, width, height, color):
-        GameObject.__init__(self, x, y, width, height, color)
+    def __init__(self, x, y, offsets, color):
+        GameObject.__init__(self, x, y, offsets, color)
     def update(self, dt):
-        GameObject.update(self, dt)
+        pass
     def draw(self, screen, camera):
         GameObject.draw(self, screen, camera)
 
 #includes any objects that collide with player
 class DynamicObject(GameObject):
-    def __init__(self, x, y, width, height, color):
-        GameObject.__init__(self, x, y, width, height, color)
+    def __init__(self, x, y, offsets, color):
+        GameObject.__init__(self, x, y, offsets, color)
         self.dynamic = True 
         self.vel = pygame.math.Vector2(0,0)
         self.old_vel = pygame.math.Vector2(0,0)
@@ -58,7 +68,7 @@ class DynamicObject(GameObject):
         #physics check
         for entity in entities:
             if entity != self:
-                if self.rect.colliderect(entity):
+                if self.rect.colliderect(entity): #Doesn't work is shape has negative values for width and height
                     vec = physics.collide(self, entity)
                     if vec:
                         self.pos -= vec
@@ -68,6 +78,8 @@ class DynamicObject(GameObject):
                         #correct the velocity based on the vec return --- Nathan Brink
                         res_vec = self.bounce * pygame.math.Vector2(physics.normalize(vec)) * physics.dot_product(physics.normalize(vec), self.vel)
                         self.vel -= res_vec
+                        if entity.dynamic:
+                            entity.vel += res_vec
                         if res_vec[1] > 0:
                             self.onground = True
                         elif res_vec[1] == 0 :
