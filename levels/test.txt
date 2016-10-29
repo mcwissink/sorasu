@@ -1,0 +1,120 @@
+{
+  "foreGroundEntities": [],
+  "dynamicEntities": [],
+  "backGroundEntities": [],
+  "staticEntities": [
+    {
+      "parallax": 1,
+      "wall_fric": 0.1,
+      "x": 195,
+      "offsets": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          267
+        ],
+        [
+          337,
+          267
+        ],
+        [
+          337,
+          0
+        ]
+      ],
+      "y": 218,
+      "ground_fric": 0.1
+    },
+    {
+      "parallax": 1,
+      "wall_fric": 0.1,
+      "x": 195,
+      "offsets": [
+        [
+          0,
+          210
+        ],
+        [
+          337,
+          210
+        ],
+        [
+          337,
+          0
+        ]
+      ],
+      "y": 8,
+      "ground_fric": 0.1
+    },
+    {
+      "parallax": 1,
+      "wall_fric": 0.1,
+      "x": 195,
+      "offsets": [
+        [
+          0,
+          0
+        ],
+        [
+          337,
+          115
+        ],
+        [
+          337,
+          0
+        ]
+      ],
+      "y": -107,
+      "ground_fric": 0.1
+    },
+    {
+      "parallax": 1,
+      "wall_fric": 0.1,
+      "x": 195,
+      "offsets": [
+        [
+          0,
+          132
+        ],
+        [
+          337,
+          132
+        ],
+        [
+          337,
+          0
+        ]
+      ],
+      "y": -239,
+      "ground_fric": 0.1
+    },
+    {
+      "parallax": 1,
+      "wall_fric": 0.1,
+      "x": 532,
+      "offsets": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          724
+        ],
+        [
+          163,
+          724
+        ],
+        [
+          163,
+          0
+        ]
+      ],
+      "y": -239,
+      "ground_fric": 0.1
+    }
+  ]
+}

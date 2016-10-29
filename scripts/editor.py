@@ -5,19 +5,21 @@ contains editor logic for creating levels
 '''
 
 import pygame, sys
-import math
+import math, json
 import random
 import game_object
-import button
 import utilities
+from game import GameState
+from button import Button
 from camera import Camera
 from player import Player
 
-class EditorState():
-    def __init__(self):
+class EditorState(GameState):
+    def __init__(self, file_name=None):
         '''
         initiate the game
         '''
+        super(EditorState, self).__init__(file_name)
         pygame.mouse.set_visible(True) # Make the mouse invisible
         self.buttons = [] #containter for buttons
         self.backGroundEntities = [] #scenery and other things that don't collide
@@ -153,6 +155,10 @@ class EditorState():
                 self.draw_type = 1
             if event.key == pygame.K_8:
                 self.draw_type = 0
+            if event.key == pygame.K_9:
+                super(EditorState, self).load_game('test')
+            if event.key == pygame.K_0:
+                self.save_game('test', super(EditorState, self))
         #check if mouse downs
         if event.type == pygame.MOUSEBUTTONDOWN:
             #creates things 
@@ -167,7 +173,7 @@ class EditorState():
                     if not self.continue_draw:
                         #setup a new draw
                         self.origin = self.init_pos
-                        draw_entity = game_object.StaticObject(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], (0,0,0))
+                        draw_entity = game_object.StaticObject(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], 1)
                         self.current_draw = draw_entity
                         self.gameEntities.append(draw_entity)
                         self.continue_draw = True
@@ -232,8 +238,9 @@ class EditorState():
         '''
         self.save = Button(-150, 100, self.button_font, (0,0,0), 100, 'Game')
         def onGameClick():
-            return GameState()
+            return None
         self.gameButton.onClick = onGameClick
+        
     def draw_menu(self, screen, ):
         '''
         draws the menu
@@ -313,3 +320,11 @@ class EditorState():
             return self.backGroundEntities
         else:
             return self.foreGroundEntities
+        
+    def save_game(self, name, game):
+        '''
+        converts the game into a txt file
+        '''
+        with open('../levels/' + name +'.txt', 'w') as file:
+            # https://docs.python.org/2/library/json.html
+            file.write(json.dumps(game.to_dictionary(), indent = 2))

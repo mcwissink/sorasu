@@ -5,15 +5,11 @@ contains utilities used for uncommon functions
 '''
 
 import pygame, sys
-import json
 
-''' CS 108
-Created Fall 2014
-util
-@author: Kristofer Brink (kpb23)
-'''
 def load(image_location, alpha=True):
-    '''
+    ''' CS 108
+    Created Fall 2014
+    @author: Kristofer Brink (kpb23)
     Loads an image from a location and auto does alpha unless if specified otherwise
     (string, bool) -> pygame surface
     '''
@@ -29,12 +25,13 @@ def load(image_location, alpha=True):
         print('Cannot Load image from path:', image_location)
         
         myfont = pygame.font.SysFont("monospace", 16)
-        return myfont.render("Couldn't load " + image_location, 1, (0,0,0))         
+        return myfont.render("Couldn't load " + image_location, 1, (0,0,0))
 
-def save(name, game):
+def merge_dicts(x, y):
     '''
-    converts the game into a txt file
+    merges two dictionaries
     '''
-    with open('worlds/' + name +'.txt', 'w') as file:
-        # https://docs.python.org/2/library/json.html
-        file.write(json.dumps(game.to_dictionary(), indent = 2))
+    #http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
+    z = x.copy()
+    z.update(y)
+    return z

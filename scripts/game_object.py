@@ -7,15 +7,16 @@ parent class for all objects used in game
 import pygame, sys
 import math
 import physics
+import utilities
 
 #base class for all object in game
 class GameObject(object):
-    def __init__(self, x, y, offsets, color):
-        self.color = color
+    def __init__(self, x, y, offsets, parallax):
+        self.color = (0,0,0)
         self.dynamic = False
         self.offsets = offsets
+        self.parallax = parallax
         self.select_offset = (0, 0) #used for dragging
-        '''fix this because x and y dont update'''
         #this is a collision bounding box set in the editor script
         self.rect = pygame.Rect(x ,y ,0 , 0)
     def update(self, dt):
@@ -31,27 +32,46 @@ class GameObject(object):
     def get_corners(self):
         '''apply offsets from x and y'''
         return [(self.rect.x + offset[0], self.rect.y + offset[1]) for offset in self.offsets]
+    def to_dictionary(self):
+        '''creates a dictionary of variables for saving'''
+        return {
+                'x' : self.rect.x, 
+                'y': self.rect.y, 
+                'parallax' : self.parallax,
+                'offsets' : self.offsets
+               }
 
 #includes any objects that are simply scenery
 class StaticObject(GameObject):
-    def __init__(self, x, y, offsets, color):
-        GameObject.__init__(self, x, y, offsets, color)
+    def __init__(self, x, y, offsets, parallax, ground_fric=0.1, wall_fric=0.1):
+        GameObject.__init__(self, x, y, offsets, parallax)
+        self.ground_fric = ground_fric
+        self.wall_fric = wall_fric
     def update(self, dt):
         pass
     def draw(self, screen, camera):
         GameObject.draw(self, screen, camera)
+    def to_dictionary(self):
+        '''creates a dictionary of variables for saving specifically for Static Objects''' 
+        #http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
+        return utilities.merge_dicts(GameObject.to_dictionary(self),
+                {
+                'ground_fric' : self.ground_fric,
+                'wall_fric' : self.wall_fric})
 
 #includes any objects that collide with player
 class DynamicObject(GameObject):
-    def __init__(self, x, y, offsets, color):
-        GameObject.__init__(self, x, y, offsets, color)
+    #create universal gravity constant
+    GRAVITY = 100
+    def __init__(self, x, y, offsets, parallax, mass=1):
+        GameObject.__init__(self, x, y, offsets, parallax)
         self.dynamic = True 
         self.vel = pygame.math.Vector2(0,0)
         self.old_vel = pygame.math.Vector2(0,0)
         self.pos = pygame.math.Vector2(x,y)
-        self.grav = 1500
+        self.mass = mass
+        self.grav = self.GRAVITY*self.mass
         self.fric = pygame.math.Vector2(0.01,0.01)
-        self.bounce = 1
         self.onground = False
         self.onwall = 0
     def update(self, dt, entities):
@@ -63,7 +83,6 @@ class DynamicObject(GameObject):
         self.pos += (self.old_vel + self.vel) * 0.5 * dt
         self.rect.x = self.pos.x
         self.rect.y = self.pos.y
-        GameObject.update(self, dt)
         #physics check
         for entity in entities:
             if entity != self:
@@ -88,3 +107,9 @@ class DynamicObject(GameObject):
                                 self.onwall = -1
     def draw(self, screen, camera):
         GameObject.draw(self, screen, camera)
+    
+    def to_dictionary(self):
+        '''creates a dictionary of variables for saving specifically for Dynamic Objects'''
+        return utilities.merge_dicts(GameObject.to_dictionary(self),
+                {
+                'mass' : self.mass})

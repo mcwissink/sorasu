@@ -5,7 +5,7 @@ contains game logic and draw calls
 '''
 
 import pygame, sys
-import math
+import math,json
 import random
 import game_object
 import button
@@ -14,18 +14,21 @@ from camera import Camera
 from player import Player
 
 class GameState():
-    def __init__(self):
+    def __init__(self, file_name=None):
         '''
         initiate the game
         '''
-        self.switch_state = 0
         pygame.mouse.set_visible(False) # Make the mouse invisible
-        self.player = Player(100, -100, [(10,10),(-10,10),(-10,-10),(10,-10)], (255,0,0))
-        test1 = game_object.StaticObject(-10, 0, [(100,100),(-10,10),(-100,-10),(10,-10)], (0,225,0))
-        self.buttons = [] #containter for buttons
+        self.gameEntities = [] #blocks and other objects that collide
         self.backGroundEntities = [] #scenery and other things that don't collide
-        self.gameEntities = [self.player, test1] #blocks and other objects that collide
         self.foreGroundEntities = [] #scenery and other things that don't collide
+        self.buttons = []
+        #load the file
+        self.file_name = file_name
+        if file_name is not None:
+            self.load_game(file_name)
+        
+        self.player = Player(100, -100, [(10,10),(-10,10),(-10,-10),(10,-10)], (255,0,0))
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
         self.camera = Camera(900, 600, self.player)
     def update(self, dt):
@@ -100,12 +103,32 @@ class GameState():
             if button.rect.collidepoint(mouse):
                 return button
     
+    
+    #for saving and loading the game
     def to_dictionary(self):
         ''' 
         changes the game into a dictionary for saving
         '''
         return {
-                'gameEntities' : [entity.to_dictionary() for entity in self.gameEntities],
+                'dynamicEntities' : [entity.to_dictionary() for entity in self.gameEntities if entity.dynamic],
+                'staticEntities' : [entity.to_dictionary() for entity in self.gameEntities if not entity.dynamic],
                 'backGroundEntities' : [scenery.to_dictionary() for scenery in self.backGroundEntities],
                 'foreGroundEntities' : [scenery.to_dictionary() for scenery in self.foreGroundEntities]
                 }
+    def from_dictionary(self, dictionary):
+        '''
+        load level from a dictionary
+        '''
+        dynamic = [game_object.DynamicObject(self.texture_cache, **{key: value for (key, value) in i.items()}) for i in dictionary['dynamicEntities']]
+        static = [game_object.StaticObject(self.texture_cache, **{key: value for (key, value) in i.items()}) for i in dictionary['staticEntities']]
+        self.gameEntities = dynamic + static
+        self.scenery_background = [game_object.GameObject(self.texture_cache, **{key: value for (key, value) in i.items()}) for i in dictionary['backGroundEntities']]
+        self.scenery_foreground = [game_object.GameObject(self.texture_cache, **{key: value for (key, value) in i.items()}) for i in dictionary['foreGroundEntities']]
+    
+    def load_game(self, file_name):
+        '''
+        loads game from text file
+        '''
+        if file_name is not None:
+            with open('../levels/' + file_name +'.txt') as file:
+                self.from_dictionary(json.loads(file.read()))
