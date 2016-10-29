@@ -9,6 +9,7 @@ import math
 import random
 import game_object
 import button
+import utilities
 from camera import Camera
 from player import Player
 
@@ -43,6 +44,7 @@ class GameState():
         for entity in self.foreGroundEntities:
             entity.update(dt)
         self.camera.update(self.keys, dt)
+
     def draw(self, draw, screen):
         '''
         loop through objects and draw them
@@ -56,6 +58,7 @@ class GameState():
             entity.draw(screen, self.camera)
         for entity in self.buttons:
             entity.draw(screen)
+
     def eventHandler(self, event):
         '''
         handles keyboard events
@@ -96,3 +99,13 @@ class GameState():
         for button in self.buttons:
             if button.rect.collidepoint(mouse):
                 return button
+    
+    def to_dictionary(self):
+        ''' 
+        changes the game into a dictionary for saving
+        '''
+        return {
+                'gameEntities' : [entity.to_dictionary() for entity in self.gameEntities],
+                'backGroundEntities' : [scenery.to_dictionary() for scenery in self.backGroundEntities],
+                'foreGroundEntities' : [scenery.to_dictionary() for scenery in self.foreGroundEntities]
+                }

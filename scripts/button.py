@@ -9,19 +9,24 @@ import math
 
 #base class for all object in game
 class Button():
-    def __init__(self, x, y, width, height, color, text):
+    def __init__(self, x, y, font, color, size, text, center=False):
         '''
         initialize button
         '''
+        #store necessary variables
+        #if centered, use x and y as offsets
         self.color = color
+        self.text = text
+        self.font = font
+        self.label = self.font.render(self.text, 1, self.color)
+        width, height = font.size(self.text)
         self.rect = pygame.Rect(x, y, width, height)
-        self.font = pygame.font.SysFont(None, 30)
-        self.label = self.font.render(text, 1, (255, 255, 255))
-    
-    def draw(self, screen):
+        #center the button
+        self.rect.centerx = self.rect.x
+        self.rect.centery = self.rect.y
+        
+    def draw(self, screen, camera):
         '''
         draw the button
         '''
-        pygame.draw.rect(screen, self.color, (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
-        screen.blit(self.label, (self.rect.x, self.rect.y))
-    
+        screen.blit(self.label, camera.apply_single((self.rect.x, self.rect.y)))

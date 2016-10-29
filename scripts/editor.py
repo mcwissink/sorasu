@@ -1,6 +1,6 @@
 ''' CS 108
 Created Fall 2016
-contains game logic and draw calls
+contains editor logic for creating levels
 @author: Mark Wissink (mcw33)
 '''
 
@@ -9,24 +9,24 @@ import math
 import random
 import game_object
 import button
+import utilities
 from camera import Camera
 from player import Player
-from turtle import Shape
 
 class EditorState():
     def __init__(self):
         '''
         initiate the game
         '''
-        self.switch_state = 0
         pygame.mouse.set_visible(True) # Make the mouse invisible
         self.buttons = [] #containter for buttons
         self.backGroundEntities = [] #scenery and other things that don't collide
         self.gameEntities = [] #blocks and other objects that collide
         self.foreGroundEntities = [] #scenery and other things that don't collide
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False, 'ctrl': False, 'shift': False} #dictionary for key presses
-        self.camera = Camera(900, 600, 'free')
-        #drawing variables
+        self.camera = Camera(900, 600, 0)
+        #variables for all the editing
+        self.variables = {'Parallax: ': 1, 'Scale: ': 1}
         self.snap_to = (0, 0)
         self.line_to = [(0, 0), (0, 0)]
         self.init_pos = (0, 0)
@@ -43,12 +43,13 @@ class EditorState():
         loop through objects and run logic
         '''      
         #update the current snap function visuals
+        position = self.camera.apply_inverse(pygame.mouse.get_pos())
         if self.keys['ctrl']:
-            self.snap_to = self.snap_to_corner(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)
+            self.snap_to = self.snap_to_corner(position, self.gameEntities)
         else:
             self.snap_to = (0, 0)
         if self.keys['shift']:
-            self.line_to = self.snap_to_plane(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)
+            self.line_to = self.snap_to_plane(position, self.gameEntities)
         else:
             self.line_to = [(0, 0), (0, 0)]
         #if drawing something
@@ -59,10 +60,22 @@ class EditorState():
             #snap to plane
             elif self.keys['shift']:
                 position = self.line_to[1]
-            else:
-                position = self.camera.apply_inverse(pygame.mouse.get_pos())
             self.current_draw.rect.size = (position[0] - self.origin[0], position[1] - self.origin[1])
             self.current_draw.offsets = self.calculate_offset(self.init_pos, position, self.current_draw.rect)
+        #for deleting
+        if self.tool == 1:
+            if pygame.mouse.get_pressed()[0]:
+                self.delete_object(position, self.gameEntities)
+        #for draggin
+        if self.tool == 2:
+            if not self.drag:
+                #resize the selection box
+                self.selector_rect.size = (position[0] - self.init_pos[0], position[1] - self.init_pos[1])
+            else:
+                #drag objects around
+                for entity in self.selected:
+                    entity.rect.x = position[0] + entity.select_offset[0]
+                    entity.rect.y = position[1] + entity.select_offset[1]
         self.camera.update(self.keys, dt)
         
     def draw(self, draw, screen):
@@ -78,14 +91,16 @@ class EditorState():
             entity.draw(screen, self.camera)
             if self.tool == 1:
                 entity.debug_draw(screen, self.camera)
+            elif self.tool == 2 and entity in self.selected:
+                entity.debug_draw(screen, self.camera)
         for entity in self.foreGroundEntities:
             entity.draw(screen, self.camera)
             if self.tool == 1:
                 entity.debug_draw(screen, self.camera)
-        for entity in self.buttons:
-            entity.draw(screen)
-        for entity in self.selected:
-            entity.debug_draw(screen, self.camera)
+            elif self.tool == 2 and entity in self.selected:
+                entity.debug_draw(screen, self.camera)
+        #draw debug visuals
+        # entity.debug_draw(screen, self.camera)
         if self.keys['ctrl']:
             pygame.draw.circle(screen, (255,0,0), self.camera.apply_single(self.snap_to), 7, 2)
         if self.keys['shift']:
@@ -93,6 +108,7 @@ class EditorState():
         if pygame.mouse.get_pressed()[0] and self.tool == 2 and not self.drag:
             position = self.camera.apply_single((self.selector_rect.x, self.selector_rect.y))
             pygame.draw.rect(screen, (255,0,0), (position[0], position[1], self.selector_rect.width, self.selector_rect.height), 2)
+
     def eventHandler(self, event):
         '''
         handles user inputs
@@ -157,11 +173,6 @@ class EditorState():
                         self.continue_draw = True
                     else:
                         #finish draw
-                        '''
-                        x_list = [offset_x[0] for offset_x in self.current_draw.offsets]
-                        y_list = [offset_y[1] for offset_y in self.current_draw.offsets]
-                        self.current_draw.rect = pygame.Rect(self.current_draw.origin[0]+min(x_list), self.current_draw.origin[1]+min(y_list), max(x_list) - min(x_list), max(y_list) - min(y_list))
-                        '''
                         #snap to corner
                         if self.keys['ctrl']:
                             position = self.snap_to
@@ -172,7 +183,9 @@ class EditorState():
                             position = self.camera.apply_inverse(pygame.mouse.get_pos())
                         self.current_draw.rect.normalize()
                         self.current_draw.offsets = self.calculate_offset(self.origin, position, self.current_draw.rect)
-                        print(self.current_draw.rect)
+                        #delete object if it is too small
+                        if self.current_draw.rect.width < 0.1 or self.current_draw.rect.height < 0.1:
+                            self.gameEntities.remove(self.current_draw)
                         self.current_draw = None
                         self.continue_draw = False
                 if self.tool == 2:
@@ -185,10 +198,17 @@ class EditorState():
                     else:
                         for entity in self.selected:
                             entity.select_offset = (entity.rect.x - self.init_pos[0], entity.rect.y - self.init_pos[1])
-                               
+            #change layer
+            elif event.button == 4:
+                self.parallax = min(self.parallax + 1, 10)
+                print(self.parallax)
+            elif event.button == 5:
+                self.parallax = max(self.parallax - 1, 0)
+                print(self.parallax)               
         #check if mouse up
         if event.type == pygame.MOUSEBUTTONUP:
             pygame.mouse.current_button = self.checkButtons(pygame.mouse.get_pos())
+            #left mouse button
             if self.tool == 2:
                 if not self.drag:
                     self.selector_rect.normalize()
@@ -204,20 +224,25 @@ class EditorState():
                 else:
                     self.drag = False
                     self.selected = []
-        #deletes things
-        if pygame.mouse.get_pressed()[0]:
-            if self.tool == 1:
-                self.delete_object(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)
-            if self.tool == 2:
-                position = self.camera.apply_inverse(pygame.mouse.get_pos())
-                if not self.drag:
-                    #resize the selection box
-                    self.selector_rect.size = (position[0] - self.init_pos[0], position[1] - self.init_pos[1])
-                else:
-                    #drag objects around
-                    for entity in self.selected:
-                        entity.rect.x = position[0] + entity.select_offset[0]
-                        entity.rect.y = position[1] + entity.select_offset[1]
+                    
+    #function for initializing the menu
+    def initialize_menu(self):
+        '''
+        initializes the menu and the variables needed for it
+        '''
+        self.save = Button(-150, 100, self.button_font, (0,0,0), 100, 'Game')
+        def onGameClick():
+            return GameState()
+        self.gameButton.onClick = onGameClick
+    def draw_menu(self, screen, ):
+        '''
+        draws the menu
+        '''
+        #draw background of the side bar
+        screen_size = screen.get_size()
+        pygame.draw.rect(screen, (0,0,0), (0, 0, 200, screen_size[1]))
+        for entity in self.buttons:
+            entity.draw(screen)
     def checkButtons(self, mouse):
         '''
         loop throgh all the buttons and check if clicked
@@ -280,3 +305,11 @@ class EditorState():
         for i in reversed(range(len(entity_list))):
             if entity_list[i].rect.collidepoint(position):
                 entity_list.pop(i)
+                
+    def get_layer(self, z):
+        if z == 1:
+            return self.gameEntities
+        elif z < 0:
+            return self.backGroundEntities
+        else:
+            return self.foreGroundEntities

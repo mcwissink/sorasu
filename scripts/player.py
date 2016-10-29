@@ -1,6 +1,6 @@
 ''' CS 108
 Created Fall 2016
-parent class for all objects used in game
+child of DynamicObject that the user can control
 @author: Mark Wissink (mcw33)
 '''
 import pygame, sys, math

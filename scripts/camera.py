@@ -1,6 +1,6 @@
 ''' CS 108
 Created Fall 2016
-parent class for all objects used in game
+camera class for a viewport
 @author: Mark Wissink (mcw33)
 '''
 import pygame, sys
@@ -38,17 +38,20 @@ class Camera(object):
         '''
         updates camera position
         '''
-        if self.target == 'free':
+        if self.target == 0: #free movement
             '''Left and right movement'''
             if keys['right'] and not keys['left']: # Right movement
                 self.viewport.centerx += 1000 * dt
             elif keys['left'] and not keys['right']: # Left movement
                 self.viewport.centerx -= 1000 * dt
             '''Up and down movement'''
-            if keys['up'] and not keys['down']: # Jump, wall jump 
+            if keys['up'] and not keys['down']: # Up movement
                 self.viewport.centery -= 1000 * dt
-            elif keys['down'] and not keys['up']: # Fall faster when user is pressing down
+            elif keys['down'] and not keys['up']: # Down movement
                 self.viewport.centery += 1000 * dt
+        elif self.target == 1: #fixed
+            self.viewport.centerx = 0
+            self.viewport.centery = 0
         else:
             self.viewport.centerx = self.target.rect.centerx 
             self.viewport.centery = self.target.rect.centery
