@@ -36,7 +36,7 @@ class MenuState():
         self.logo_x, self.logo_y = (0,0)
         self.gameButton = Button(-150, 100, self.button_font, (0,0,0), 100, 'Game')
         def onGameClick():
-            return GameState()
+            return GameState('test')
         self.gameButton.onClick = onGameClick
         self.editorButton = Button(150, 100, self.button_font, (0,0,0), 100, 'Editor')
         def onEditorClick():

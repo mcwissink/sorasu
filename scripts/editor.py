@@ -19,14 +19,20 @@ class EditorState(GameState):
         '''
         initiate the game
         '''
+        
         super(EditorState, self).__init__(file_name)
+        if file_name is None:
+            self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], 1, 15)
+            self.gameEntities.append(self.player)
+            self.camera = Camera(900, 600, 0)
+        #center the camera on the player
+        self.camera.viewport.centerx = self.player.rect.centerx 
+        self.camera.viewport.centery = self.player.rect.centery
+        self.camera.target = 0
         pygame.mouse.set_visible(True) # Make the mouse invisible
         self.buttons = [] #containter for buttons
-        self.backGroundEntities = [] #scenery and other things that don't collide
-        self.gameEntities = [] #blocks and other objects that collide
-        self.foreGroundEntities = [] #scenery and other things that don't collide
-        self.keys = {'up': False, 'down': False, 'left': False, 'right': False, 'ctrl': False, 'shift': False} #dictionary for key presses
-        self.camera = Camera(900, 600, 0)
+        self.editor_keys = {'up': False, 'down': False, 'left': False, 'right': False, 'ctrl': False, 'shift': False} #dictionary for key presses
+        self.test_level = False
         #variables for all the editing
         self.variables = {'Parallax: ': 1, 'Scale: ': 1}
         self.snap_to = (0, 0)
@@ -46,21 +52,21 @@ class EditorState(GameState):
         '''      
         #update the current snap function visuals
         position = self.camera.apply_inverse(pygame.mouse.get_pos())
-        if self.keys['ctrl']:
+        if self.editor_keys['ctrl']:
             self.snap_to = self.snap_to_corner(position, self.gameEntities)
         else:
             self.snap_to = (0, 0)
-        if self.keys['shift']:
+        if self.editor_keys['shift']:
             self.line_to = self.snap_to_plane(position, self.gameEntities)
         else:
             self.line_to = [(0, 0), (0, 0)]
         #if drawing something
         if self.continue_draw:
             #snap to corner
-            if self.keys['ctrl']:
+            if self.editor_keys['ctrl']:
                 position = self.snap_to
             #snap to plane
-            elif self.keys['shift']:
+            elif self.editor_keys['shift']:
                 position = self.line_to[1]
             self.current_draw.rect.size = (position[0] - self.origin[0], position[1] - self.origin[1])
             self.current_draw.offsets = self.calculate_offset(self.init_pos, position, self.current_draw.rect)
@@ -78,7 +84,10 @@ class EditorState(GameState):
                 for entity in self.selected:
                     entity.rect.x = position[0] + entity.select_offset[0]
                     entity.rect.y = position[1] + entity.select_offset[1]
-        self.camera.update(self.keys, dt)
+        if self.test_level:
+            super(EditorState, self).update(dt)
+        else:
+            self.camera.update(self.editor_keys, dt)
         
     def draw(self, draw, screen):
         '''
@@ -103,9 +112,9 @@ class EditorState(GameState):
                 entity.debug_draw(screen, self.camera)
         #draw debug visuals
         # entity.debug_draw(screen, self.camera)
-        if self.keys['ctrl']:
+        if self.editor_keys['ctrl']:
             pygame.draw.circle(screen, (255,0,0), self.camera.apply_single(self.snap_to), 7, 2)
-        if self.keys['shift']:
+        if self.editor_keys['shift']:
             pygame.draw.line(screen, (255,0,0), self.camera.apply_single(self.line_to[0]), self.camera.apply_single(self.line_to[1]), 2)
         if pygame.mouse.get_pressed()[0] and self.tool == 2 and not self.drag:
             position = self.camera.apply_single((self.selector_rect.x, self.selector_rect.y))
@@ -115,34 +124,36 @@ class EditorState(GameState):
         '''
         handles user inputs
         '''
+        if self.test_level:
+            super(EditorState, self).eventHandler(event)
         #check for key down
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
-                self.keys['up'] = True
+                self.editor_keys['up'] = True
             if event.key == pygame.K_s:
-                self.keys['down'] = True
+                self.editor_keys['down'] = True
             if event.key == pygame.K_a:
-                self.keys['left'] = True
+                self.editor_keys['left'] = True
             if event.key == pygame.K_d:
-                self.keys['right'] = True
+                self.editor_keys['right'] = True
             if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
-                self.keys['ctrl'] = True
+                self.editor_keys['ctrl'] = True
             if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
-                self.keys['shift'] = True
+                self.editor_keys['shift'] = True
         #check if for key up
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
-                self.keys['up'] = False
+                self.editor_keys['up'] = False
             if event.key == pygame.K_s:
-                self.keys['down'] = False
+                self.editor_keys['down'] = False
             if event.key == pygame.K_a:
-                self.keys['left'] = False
+                self.editor_keys['left'] = False
             if event.key == pygame.K_d:
-                self.keys['right'] = False
+                self.editor_keys['right'] = False
             if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
-                self.keys['ctrl'] = False
+                self.editor_keys['ctrl'] = False
             if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
-                self.keys['shift'] = False
+                self.editor_keys['shift'] = False
             if event.key == pygame.K_1:
                 self.tool = 0 #pen
                 self.selected = []
@@ -159,15 +170,18 @@ class EditorState(GameState):
                 super(EditorState, self).load_game('test')
             if event.key == pygame.K_0:
                 self.save_game('test', super(EditorState, self))
+            if event.key == pygame.K_p:
+                self.test_level ^= True
+                self.camera.target = self.player
         #check if mouse downs
         if event.type == pygame.MOUSEBUTTONDOWN:
             #creates things 
             if pygame.mouse.get_pressed()[0]:
                 self.init_pos = self.camera.apply_inverse(pygame.mouse.get_pos())
                 if self.tool == 0:
-                    if self.keys['ctrl']:
+                    if self.editor_keys['ctrl']:
                         self.init_pos = self.snap_to_corner(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)
-                    elif self.keys['shift']:
+                    elif self.editor_keys['shift']:
                         self.init_pos = self.snap_to_plane(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)[1] 
                     pygame.mouse.last_click = self.checkButtons(pygame.mouse.get_pos())
                     if not self.continue_draw:
@@ -180,10 +194,10 @@ class EditorState(GameState):
                     else:
                         #finish draw
                         #snap to corner
-                        if self.keys['ctrl']:
+                        if self.editor_keys['ctrl']:
                             position = self.snap_to
                         #snap to plane
-                        elif self.keys['shift']:
+                        elif self.editor_keys['shift']:
                             position = self.line_to[1]
                         else:
                             position = self.camera.apply_inverse(pygame.mouse.get_pos())

@@ -1,12 +1,37 @@
 {
   "foreGroundEntities": [],
-  "dynamicEntities": [],
+  "player": {
+    "x": 0,
+    "parallax": 1,
+    "mass": 15,
+    "offsets": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        40
+      ],
+      [
+        20,
+        40
+      ],
+      [
+        20,
+        0
+      ]
+    ],
+    "y": 0
+  },
   "backGroundEntities": [],
+  "dynamicEntities": [],
   "staticEntities": [
     {
       "parallax": 1,
       "wall_fric": 0.1,
-      "x": 195,
+      "ground_fric": 0.1,
+      "x": -166,
       "offsets": [
         [
           0,
@@ -14,87 +39,49 @@
         ],
         [
           0,
-          267
+          119
         ],
         [
-          337,
-          267
+          432,
+          119
         ],
         [
-          337,
+          432,
           0
         ]
       ],
-      "y": 218,
-      "ground_fric": 0.1
+      "y": 114
     },
     {
       "parallax": 1,
       "wall_fric": 0.1,
-      "x": 195,
+      "ground_fric": 0.1,
+      "x": 60,
       "offsets": [
         [
           0,
-          210
+          0
         ],
         [
-          337,
-          210
+          0,
+          291
         ],
         [
-          337,
+          375,
+          291
+        ],
+        [
+          375,
           0
         ]
       ],
-      "y": 8,
-      "ground_fric": 0.1
+      "y": -176
     },
     {
       "parallax": 1,
       "wall_fric": 0.1,
-      "x": 195,
-      "offsets": [
-        [
-          0,
-          0
-        ],
-        [
-          337,
-          115
-        ],
-        [
-          337,
-          0
-        ]
-      ],
-      "y": -107,
-      "ground_fric": 0.1
-    },
-    {
-      "parallax": 1,
-      "wall_fric": 0.1,
-      "x": 195,
-      "offsets": [
-        [
-          0,
-          132
-        ],
-        [
-          337,
-          132
-        ],
-        [
-          337,
-          0
-        ]
-      ],
-      "y": -239,
-      "ground_fric": 0.1
-    },
-    {
-      "parallax": 1,
-      "wall_fric": 0.1,
-      "x": 532,
+      "ground_fric": 0.1,
+      "x": -487,
       "offsets": [
         [
           0,
@@ -102,19 +89,18 @@
         ],
         [
           0,
-          724
+          275
         ],
         [
-          163,
-          724
+          377,
+          275
         ],
         [
-          163,
+          377,
           0
         ]
       ],
-      "y": -239,
-      "ground_fric": 0.1
+      "y": -148
     }
   ]
 }

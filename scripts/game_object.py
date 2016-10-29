@@ -12,13 +12,15 @@ import utilities
 #base class for all object in game
 class GameObject(object):
     def __init__(self, x, y, offsets, parallax):
+        self.type = 'scenery'
         self.color = (0,0,0)
         self.dynamic = False
         self.offsets = offsets
         self.parallax = parallax
         self.select_offset = (0, 0) #used for dragging
-        #this is a collision bounding box set in the editor script
-        self.rect = pygame.Rect(x ,y ,0 , 0)
+        print(self.offsets)
+        #this is a collision bounding box for select and improved collision checks
+        self.rect = pygame.Rect(x ,y ,abs(offsets[2][0]), abs(offsets[2][1]))
     def update(self, dt):
         pass
     def draw(self, screen, camera):
@@ -36,7 +38,7 @@ class GameObject(object):
         '''creates a dictionary of variables for saving'''
         return {
                 'x' : self.rect.x, 
-                'y': self.rect.y, 
+                'y': self.rect.y,
                 'parallax' : self.parallax,
                 'offsets' : self.offsets
                }
@@ -45,6 +47,7 @@ class GameObject(object):
 class StaticObject(GameObject):
     def __init__(self, x, y, offsets, parallax, ground_fric=0.1, wall_fric=0.1):
         GameObject.__init__(self, x, y, offsets, parallax)
+        self.type = 'static'
         self.ground_fric = ground_fric
         self.wall_fric = wall_fric
     def update(self, dt):
@@ -65,6 +68,7 @@ class DynamicObject(GameObject):
     GRAVITY = 100
     def __init__(self, x, y, offsets, parallax, mass=1):
         GameObject.__init__(self, x, y, offsets, parallax)
+        self.type = 'dynamic'
         self.dynamic = True 
         self.vel = pygame.math.Vector2(0,0)
         self.old_vel = pygame.math.Vector2(0,0)
@@ -86,7 +90,7 @@ class DynamicObject(GameObject):
         #physics check
         for entity in entities:
             if entity != self:
-                if self.rect.colliderect(entity): #Doesn't work is shape has negative values for width and height
+                if self.rect.colliderect(entity):
                     vec = physics.collide(self, entity)
                     if vec:
                         self.pos -= vec
@@ -94,7 +98,7 @@ class DynamicObject(GameObject):
                         self.rect.y = self.pos.y
                         
                         #correct the velocity based on the vec return --- Nathan Brink
-                        res_vec = self.bounce * pygame.math.Vector2(physics.normalize(vec)) * physics.dot_product(physics.normalize(vec), self.vel)
+                        res_vec = pygame.math.Vector2(physics.normalize(vec)) * physics.dot_product(physics.normalize(vec), self.vel)
                         self.vel -= res_vec
                         if entity.dynamic:
                             entity.vel += res_vec

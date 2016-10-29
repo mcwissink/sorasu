@@ -24,13 +24,13 @@ class GameState():
         self.foreGroundEntities = [] #scenery and other things that don't collide
         self.buttons = []
         #load the file
+        self.player = None
         self.file_name = file_name
         if file_name is not None:
             self.load_game(file_name)
-        
-        self.player = Player(100, -100, [(10,10),(-10,10),(-10,-10),(10,-10)], (255,0,0))
+            self.camera = Camera(900, 600, self.player)
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
-        self.camera = Camera(900, 600, self.player)
+        
     def update(self, dt):
         '''
         loop through objects and run logic
@@ -87,6 +87,7 @@ class GameState():
             if event.key == pygame.K_RIGHT:
                 self.keys['right'] = False
         #check if mouse downs
+        '''
         if event.type == pygame.MOUSEBUTTONDOWN:
             pygame.mouse.last_click = self.checkButtons(pygame.mouse.get_pos())
         #check if mouse up
@@ -94,6 +95,7 @@ class GameState():
             pygame.mouse.current_button = self.checkButtons(pygame.mouse.get_pos())
             if pygame.mouse.last_click == pygame.mouse.current_button and pygame.mouse.current_button != None:
                 pygame.mouse.current_button.onClick(self.switch_state, MenuState())
+        '''
         
     def checkButtons(self, mouse):
         '''
@@ -110,8 +112,9 @@ class GameState():
         changes the game into a dictionary for saving
         '''
         return {
-                'dynamicEntities' : [entity.to_dictionary() for entity in self.gameEntities if entity.dynamic],
-                'staticEntities' : [entity.to_dictionary() for entity in self.gameEntities if not entity.dynamic],
+                'player' : self.player.to_dictionary(),
+                'dynamicEntities' : [entity.to_dictionary() for entity in self.gameEntities if entity.type == 'dynamic'],
+                'staticEntities' : [entity.to_dictionary() for entity in self.gameEntities if entity.type == 'static'],
                 'backGroundEntities' : [scenery.to_dictionary() for scenery in self.backGroundEntities],
                 'foreGroundEntities' : [scenery.to_dictionary() for scenery in self.foreGroundEntities]
                 }
@@ -119,11 +122,13 @@ class GameState():
         '''
         load level from a dictionary
         '''
-        dynamic = [game_object.DynamicObject(self.texture_cache, **{key: value for (key, value) in i.items()}) for i in dictionary['dynamicEntities']]
-        static = [game_object.StaticObject(self.texture_cache, **{key: value for (key, value) in i.items()}) for i in dictionary['staticEntities']]
+        self.player = Player(**{key: value for (key, value) in dictionary['player'].items()})
+        dynamic = [game_object.DynamicObject(**{key: value for (key, value) in i.items()}) for i in dictionary['dynamicEntities']]
+        static = [game_object.StaticObject(**{key: value for (key, value) in i.items()}) for i in dictionary['staticEntities']]
         self.gameEntities = dynamic + static
-        self.scenery_background = [game_object.GameObject(self.texture_cache, **{key: value for (key, value) in i.items()}) for i in dictionary['backGroundEntities']]
-        self.scenery_foreground = [game_object.GameObject(self.texture_cache, **{key: value for (key, value) in i.items()}) for i in dictionary['foreGroundEntities']]
+        self.gameEntities.append(self.player)
+        self.backGroundEntities = [game_object.GameObject(**{key: value for (key, value) in i.items()}) for i in dictionary['backGroundEntities']]
+        self.foreGroundEntities = [game_object.GameObject(**{key: value for (key, value) in i.items()}) for i in dictionary['foreGroundEntities']]
     
     def load_game(self, file_name):
         '''
