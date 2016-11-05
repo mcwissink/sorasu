@@ -1,9 +1,7 @@
 {
-  "foreGroundEntities": [],
   "player": {
-    "x": 0,
-    "parallax": 1,
-    "mass": 15,
+    "y": -683,
+    "x": 107,
     "offsets": [
       [
         0,
@@ -22,16 +20,13 @@
         0
       ]
     ],
-    "y": 0
+    "parallax": 1,
+    "mass": 30
   },
-  "backGroundEntities": [],
-  "dynamicEntities": [],
   "staticEntities": [
     {
-      "parallax": 1,
-      "wall_fric": 0.1,
-      "ground_fric": 0.1,
-      "x": -166,
+      "y": -119,
+      "x": -233,
       "offsets": [
         [
           0,
@@ -39,24 +34,24 @@
         ],
         [
           0,
-          119
+          124
         ],
         [
-          432,
-          119
+          376,
+          124
         ],
         [
-          432,
+          376,
           0
         ]
       ],
-      "y": 114
+      "ground_fric": 0.1,
+      "wall_fric": 0.1,
+      "parallax": 1
     },
     {
-      "parallax": 1,
-      "wall_fric": 0.1,
-      "ground_fric": 0.1,
-      "x": 60,
+      "y": 112,
+      "x": -202,
       "offsets": [
         [
           0,
@@ -64,24 +59,24 @@
         ],
         [
           0,
-          291
+          103
         ],
         [
-          375,
-          291
+          346,
+          103
         ],
         [
-          375,
+          346,
           0
         ]
       ],
-      "y": -176
+      "ground_fric": 0.1,
+      "wall_fric": 0.1,
+      "parallax": 1
     },
     {
-      "parallax": 1,
-      "wall_fric": 0.1,
-      "ground_fric": 0.1,
-      "x": -487,
+      "y": -260,
+      "x": 192,
       "offsets": [
         [
           0,
@@ -89,18 +84,94 @@
         ],
         [
           0,
-          275
+          470
         ],
         [
-          377,
-          275
+          212,
+          470
         ],
         [
-          377,
+          212,
           0
         ]
       ],
-      "y": -148
+      "ground_fric": 0.1,
+      "wall_fric": 0.1,
+      "parallax": 1
+    },
+    {
+      "y": -900,
+      "x": -233,
+      "offsets": [
+        [
+          0,
+          781
+        ],
+        [
+          257,
+          781
+        ],
+        [
+          257,
+          0
+        ]
+      ],
+      "ground_fric": 0.1,
+      "wall_fric": 0.1,
+      "parallax": 1
+    },
+    {
+      "y": -438,
+      "x": 68,
+      "offsets": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          236
+        ],
+        [
+          38,
+          236
+        ],
+        [
+          38,
+          0
+        ]
+      ],
+      "ground_fric": 0.1,
+      "wall_fric": 0.1,
+      "parallax": 1
+    },
+    {
+      "y": -1185,
+      "x": 615,
+      "offsets": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          407
+        ],
+        [
+          338,
+          407
+        ],
+        [
+          338,
+          0
+        ]
+      ],
+      "ground_fric": 0.1,
+      "wall_fric": 0.1,
+      "parallax": 1
     }
-  ]
+  ],
+  "dynamicEntities": [],
+  "foreGroundEntities": [],
+  "backGroundEntities": []
 }

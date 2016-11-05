@@ -14,7 +14,7 @@ def main():
     #set up the game and run the main loop`
     #os.environ['SDL_VIDEO_CENTERED'] = '1' #center window on the screen
     pygame.init() #initiate pygame
-    screen = pygame.display.set_mode((900, 600), pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.RESIZABLE)
+    screen = pygame.display.set_mode((900, 600), pygame.HWSURFACE|pygame.RESIZABLE)
     #screen overlay for a e s t h e t i c
     overlay = utilities.load('../images/overlay/overlay.png')
     overlay = pygame.transform.scale(overlay, screen.get_size())
@@ -41,7 +41,7 @@ def main():
             else:
                 currentState = currentState.eventHandler(event) or currentState
         currentState.draw(pygame.draw, screen)
-        screen.blit(overlay, (0,0))
+        #screen.blit(overlay, (0,0))
         currentState.update(deltaTime)
         pygame.display.flip() #updates the screen
         

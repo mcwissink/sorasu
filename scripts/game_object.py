@@ -18,9 +18,10 @@ class GameObject(object):
         self.offsets = offsets
         self.parallax = parallax
         self.select_offset = (0, 0) #used for dragging
-        print(self.offsets)
         #this is a collision bounding box for select and improved collision checks
-        self.rect = pygame.Rect(x ,y ,abs(offsets[2][0]), abs(offsets[2][1]))
+        x_offsets = [offset[0] for offset in offsets]
+        y_offsets = [offset[1] for offset in offsets]
+        self.rect = pygame.Rect(x ,y ,max(x_offsets), max(y_offsets))
     def update(self, dt):
         pass
     def draw(self, screen, camera):

@@ -23,12 +23,16 @@ class GameState():
         self.backGroundEntities = [] #scenery and other things that don't collide
         self.foreGroundEntities = [] #scenery and other things that don't collide
         self.buttons = []
+        self.button_hover = None #used for highlighting buttons
+        self.last_click = None #used for remembering buttons
+        self.current_button = None #used to store current button
         #load the file
         self.player = None
         self.file_name = file_name
         if file_name is not None:
             self.load_game(file_name)
             self.camera = Camera(900, 600, self.player)
+            self.camera.resize(pygame.display.get_surface())
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
         
     def update(self, dt):
@@ -46,6 +50,7 @@ class GameState():
                 entity.update(dt)
         for entity in self.foreGroundEntities:
             entity.update(dt)
+        #update the camera
         self.camera.update(self.keys, dt)
 
     def draw(self, draw, screen):
@@ -96,15 +101,6 @@ class GameState():
             if pygame.mouse.last_click == pygame.mouse.current_button and pygame.mouse.current_button != None:
                 pygame.mouse.current_button.onClick(self.switch_state, MenuState())
         '''
-        
-    def checkButtons(self, mouse):
-        '''
-        loop throgh all the buttons and check if clicked
-        '''
-        for button in self.buttons:
-            if button.rect.collidepoint(mouse):
-                return button
-    
     
     #for saving and loading the game
     def to_dictionary(self):

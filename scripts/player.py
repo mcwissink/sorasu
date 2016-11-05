@@ -28,7 +28,8 @@ class Player(DynamicObject):
         elif keys['left'] and not keys['right']: # Left movement
             self.vel.x -= 1500 * dt
         '''Up and down movement'''
-        if keys['up'] and not keys['down']: # Jump, wall jump 
+        if keys['up'] and not keys['down']: # Jump, wall jump
+            #if not self.past_up: #make sure the key is pressed and not held  
             if self.onground:
                 self.vel.y -= 1000
             if self.onwall:
