@@ -10,6 +10,7 @@ import random
 import game_object
 import utilities
 import button
+import textbox
 from game import GameState
 from camera import Camera
 from player import Player
@@ -145,9 +146,11 @@ class EditorState(GameState):
         '''
         handles user inputs
         '''
+        #special cases
         if self.test_level:
             super(EditorState, self).eventHandler(event)
-            
+        if self.textbox.active:
+            self.textbox.key_in(event)   
         #check for key down
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
@@ -254,9 +257,16 @@ class EditorState(GameState):
                     print(self.parallax)               
         #check if mouse up
         if event.type == pygame.MOUSEBUTTONUP:
+            #clicking in the menu
             if self.menu_back.collidepoint(pygame.mouse.get_pos()):
+                if self.textbox.rect.collidepoint(pygame.mouse.get_pos()):
+                    self.textbox.active = True
+                else:
+                    self.textbox.active = False
                 button.buttons_mouseup(self)
+            #clicking not in the menu
             else:
+                self.textbox.active = False 
                 #left mouse button
                 if self.tool == 2:
                     if not self.drag:
@@ -272,14 +282,15 @@ class EditorState(GameState):
                                 self.selected.append(entity)
                     else:
                         self.drag = False
-                        self.selected = []
-                        
+                        self.selected = []          
     #function for initializing the menu
     def initialize_menu(self):
         '''
         initializes the menu and the variables needed for it
         '''
         self.menu_back = pygame.Rect(0, 0, 200, 0) # height will get set in the draw method
+        #create the textbox for naming
+        self.textbox = textbox.TextBox(10, 10, 100, 50)
         self.button_font_big = pygame.font.SysFont(None, 40)
         self.button_font_small = pygame.font.SysFont(None, 20)
         self.saveButton = button.Button(100, 100, self.button_font_big, (255,255,255), 100, 'Save')
@@ -313,6 +324,7 @@ class EditorState(GameState):
         #draw background of the side bar
         self.menu_back.height = screen.get_size()[1]
         pygame.draw.rect(screen, (0,0,0), self.menu_back)
+        self.textbox.draw(screen)
         for entity in self.buttons:
             entity.draw(screen, self.camera)
 

@@ -18,20 +18,16 @@ def buttons_init(parent):
 def buttons_update(parent):
     #updates the buttons 
     if not parent.last_click:
-            current_hover = checkButtons(parent, pygame.mouse.get_pos())
-            if current_hover:
-                current_hover.label = current_hover.font.render(current_hover.text, 1, (255,0,0))
-                parent.button_hover = checkButtons(parent, pygame.mouse.get_pos())
-            elif parent.button_hover:
-                parent.button_hover.label = parent.button_hover.font.render(parent.button_hover.text, 1, parent.button_hover.color)
-                parent.button_hover = None
-
+            for button in parent.buttons:
+                button.update(pygame.mouse.get_pos())
+            
 def buttons_mousedown(parent):
     if not parent.last_click:
                 parent.last_click = checkButtons(parent, pygame.mouse.get_pos())
                 if parent.last_click:
                     parent.last_click.font.set_bold(True)
                     parent.last_click.label = parent.last_click.font.render(parent.last_click.text, 1, (255,0,0))
+
 def buttons_mouseup(parent):
     if parent.last_click:
         parent.current_button = checkButtons(parent, pygame.mouse.get_pos())
@@ -63,6 +59,7 @@ class Button():
         '''
         #store necessary variables
         #if centered, use x and y as offsets
+        self.hover = 0 # for coloring the button 
         self.returning = returning #used if a button has to return a state
         self.color = color
         self.text = text
@@ -73,8 +70,17 @@ class Button():
         #center the button
         self.rect.centerx = self.rect.x
         self.rect.centery = self.rect.y
-    def update(self, mouse, dt):
-        pass
+    def update(self, mouse):
+        '''updates the button'''
+        #this resets the color only once, instead of everyframe
+        if self.rect.collidepoint(mouse):
+            self.label = self.font.render(self.text, 1, (255,0,0))
+            self.hover = 1
+        elif self.hover == 0:
+            self.label = self.font.render(self.text, 1, self.color)
+            self.hover = 2
+        self.hover = 0
+    
     def draw(self, screen, camera):
         '''
         draw the button
