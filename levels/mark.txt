@@ -1,0 +1,106 @@
+{
+  "foreGroundEntities": [],
+  "player": {
+    "parallax": 1,
+    "x": 0,
+    "mass": 30,
+    "y": 0,
+    "offsets": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        40
+      ],
+      [
+        20,
+        40
+      ],
+      [
+        20,
+        0
+      ]
+    ]
+  },
+  "staticEntities": [
+    {
+      "wall_fric": 0.1,
+      "offsets": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          91
+        ],
+        [
+          274,
+          91
+        ],
+        [
+          274,
+          0
+        ]
+      ],
+      "y": 109,
+      "ground_fric": 0.1,
+      "x": -116,
+      "parallax": 1
+    },
+    {
+      "wall_fric": 0.1,
+      "offsets": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          403
+        ],
+        [
+          66,
+          403
+        ],
+        [
+          66,
+          0
+        ]
+      ],
+      "y": -256,
+      "ground_fric": 0.1,
+      "x": 102,
+      "parallax": 1
+    },
+    {
+      "wall_fric": 0.1,
+      "offsets": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          764
+        ],
+        [
+          192,
+          764
+        ],
+        [
+          192,
+          0
+        ]
+      ],
+      "y": -563,
+      "ground_fric": 0.1,
+      "x": -308,
+      "parallax": 1
+    }
+  ],
+  "dynamicEntities": [],
+  "backGroundEntities": []
+}

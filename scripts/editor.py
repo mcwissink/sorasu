@@ -296,16 +296,21 @@ class EditorState(GameState):
         self.saveButton = button.Button(100, 100, self.button_font_big, (255,255,255), 100, 'Save')
         #saves the game
         def onSaveClick():
-            self.save_game('test', super(EditorState, self))
+            if len(self.textbox.text) > 0:
+                self.save_game(self.textbox.text, super(EditorState, self))
         self.saveButton.onClick = onSaveClick
         self.loadButton = button.Button(100, 200, self.button_font_big, (255,255,255), 100, 'Load')
         #loads the game
         def onLoadClick():
-            super(EditorState, self).load_game('test')
-            self.test_level = False
-            self.camera.viewport.centerx = self.player.rect.centerx 
-            self.camera.viewport.centery = self.player.rect.centery
-            self.camera.target = 0
+            if len(self.textbox.text) > 0:
+                try:
+                    super(EditorState, self).load_game(self.textbox.text)
+                    self.test_level = False
+                    self.camera.viewport.centerx = self.player.rect.centerx 
+                    self.camera.viewport.centery = self.player.rect.centery
+                    self.camera.target = 0
+                except:
+                    pass
         self.loadButton.onClick = onLoadClick
         self.buttons = [self.saveButton, self.loadButton] #container for buttons
         y_offset = 0

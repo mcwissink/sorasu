@@ -18,8 +18,8 @@ def buttons_init(parent):
 def buttons_update(parent):
     #updates the buttons 
     if not parent.last_click:
-            for button in parent.buttons:
-                button.update(pygame.mouse.get_pos())
+        for button in parent.buttons:
+            button.update(pygame.mouse.get_pos())
             
 def buttons_mousedown(parent):
     if not parent.last_click:

@@ -11,10 +11,7 @@ class TextBox():
     def __init__(self, x, y, width, height, text=''):
         '''initilizes the textbox'''
         #set fonts
-        try:
-            self.font = pygame.font.Font("../images/jbrush.TTF", 25)
-        except:
-            self.font = pygame.font.SysFont(None, 25)
+        self.font = pygame.font.SysFont(None, 25)
         self.text = text
         self.rect = pygame.Rect(x, y, width, height)
         self.text_list = []

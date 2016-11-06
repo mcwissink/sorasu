@@ -66,7 +66,7 @@ class StaticObject(GameObject):
 #includes any objects that collide with player
 class DynamicObject(GameObject):
     #create universal gravity constant
-    GRAVITY = 10
+    GRAVITY = 100
     def __init__(self, x, y, offsets, parallax, mass=1):
         GameObject.__init__(self, x, y, offsets, parallax)
         self.type = 'dynamic'
