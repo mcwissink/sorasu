@@ -37,7 +37,10 @@ def main():
                 #resize the overlay
                 overlay = pygame.transform.scale(overlay, screen.get_size())
                 if hasattr(currentState, 'camera'):
-                    currentState.camera.resize(screen)     
+                    currentState.camera.resize(screen)
+                #realign buttons
+                for button in currentState.buttons:
+                    button.realign(currentState.camera) 
             else:
                 currentState = currentState.eventHandler(event) or currentState
         currentState.draw(pygame.draw, screen)

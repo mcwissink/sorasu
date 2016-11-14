@@ -32,15 +32,17 @@ class MenuState():
         #draw logo
         self.logo_text = self.title_font.render('Sorasu', 1, (0,0,0))
         self.logo_x, self.logo_y = (0,0)
-        self.gameButton = button.Button(200, 200, self.button_font, (0,0,0), 100, 'Game', True)
+        self.gameButton = button.Button(75, 75, self.button_font, (0,0,0), 100, 'Game',(0.5,0.5), True)
         def onGameClick():
             return GameState('test')
         self.gameButton.onClick = onGameClick
+        self.gameButton.realign(self.camera)
         self.buttons.append(self.gameButton)
-        self.editorButton = button.Button(150, 100, self.button_font, (0,0,0), 100, 'Editor', True)
+        self.editorButton = button.Button(-300, 75, self.button_font, (0,0,0), 100, 'Editor', (0.5,0.5), True)
         def onEditorClick():
             return EditorState()
         self.editorButton.onClick = onEditorClick
+        self.editorButton.realign(self.camera)
         self.buttons.append(self.editorButton)
     def update(self, dt):
         '''

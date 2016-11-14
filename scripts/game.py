@@ -22,10 +22,7 @@ class GameState():
         self.gameEntities = [] #blocks and other objects that collide
         self.backGroundEntities = [] #scenery and other things that don't collide
         self.foreGroundEntities = [] #scenery and other things that don't collide
-        self.buttons = []
-        self.button_hover = None #used for highlighting buttons
-        self.last_click = None #used for remembering buttons
-        self.current_button = None #used to store current button
+        self.buttons = [] # list for buttons
         #load the file
         self.player = None
         self.file_name = file_name
@@ -34,7 +31,7 @@ class GameState():
             self.camera = Camera(900, 600, self.player)
             self.camera.resize(pygame.display.get_surface())
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
-        
+
     def update(self, dt):
         '''
         loop through objects and run logic

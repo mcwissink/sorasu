@@ -11,7 +11,10 @@ class Camera(object):
     '''
     def __init__(self, width, height, target): #http://stackoverflow.com/questions/14354171/add-scrolling-to-a-platformer-in-pygame/14357169#14357169
         self.viewport = pygame.Rect(0, 0, width, height)
-        self.target = target
+        try:
+            self.target = target
+        except:
+            self.target = 0
     def apply(self, points):
         '''
         applies camera logic to multiple points

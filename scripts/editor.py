@@ -23,7 +23,7 @@ class EditorState(GameState):
         
         super(EditorState, self).__init__(file_name)
         if file_name is None:
-            self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], 1, 100)
+            self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], 10)
             self.gameEntities.append(self.player)
             self.camera = Camera(900, 600, 0)
             self.camera.resize(pygame.display.get_surface())
@@ -51,7 +51,8 @@ class EditorState(GameState):
         self.origin = (0, 0)
         self.current_draw = None
         self.continue_draw = False
-        self.draw_type = 0
+        self.draw_type = game_object.StaticObject
+        self.draw_shape = 0
         self.tool = 0 #tool includes 0=pen, 1=eraser, and 2=selector
         self.selector_rect = pygame.Rect(0,0,0,0) #used for selecting objects
         self.selected = [] #list for selected objects
@@ -96,10 +97,11 @@ class EditorState(GameState):
                 for entity in self.selected:
                     entity.rect.x = position[0] + entity.select_offset[0]
                     entity.rect.y = position[1] + entity.select_offset[1]
-                    #since the variable pos plays into dynamic objects positioning
+                    #since the variable pos and spawn plays into dynamic objects positioning
                     if entity.dynamic:
                         entity.pos[0] = entity.rect.x
                         entity.pos[1] = entity.rect.y 
+                        entity.spawn = (entity.rect.x, entity.rect.y)
         #perform game logic if game is running
         if self.test_level:
             super(EditorState, self).update(dt)   
@@ -146,61 +148,62 @@ class EditorState(GameState):
         '''
         handles user inputs
         '''
-        #special cases
-        if self.test_level:
-            super(EditorState, self).eventHandler(event)
+        #special case
         if self.textbox.active:
-            self.textbox.key_in(event)   
-        #check for key down
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                self.editor_keys['up'] = True
-            if event.key == pygame.K_s:
-                self.editor_keys['down'] = True
-            if event.key == pygame.K_a:
-                self.editor_keys['left'] = True
-            if event.key == pygame.K_d:
-                self.editor_keys['right'] = True
-            if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
-                self.editor_keys['ctrl'] = True
-            if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
-                self.editor_keys['shift'] = True
-        #check if for key up
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_w:
-                self.editor_keys['up'] = False
-            if event.key == pygame.K_s:
-                self.editor_keys['down'] = False
-            if event.key == pygame.K_a:
-                self.editor_keys['left'] = False
-            if event.key == pygame.K_d:
-                self.editor_keys['right'] = False
-            if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
-                self.editor_keys['ctrl'] = False
-            if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
-                self.editor_keys['shift'] = False
-            if event.key == pygame.K_1:
-                self.tool = 0 #pen
-                self.selected = []
-            if event.key == pygame.K_2:
-                self.tool = 1 #eraser
-                self.selected = []
-            if event.key == pygame.K_3:
-                self.tool = 2 #selector
-            if event.key == pygame.K_7:
-                self.draw_type = 1
-            if event.key == pygame.K_8:
-                self.draw_type = 0
-            if event.key == pygame.K_9:
-                self.draw_variables[self.selected_var] += 0.1
-            if event.key == pygame.K_0:
-                self.draw_variables[self.selected_var] += 0.1
-            if event.key == pygame.K_p:
-                self.test_level ^= True
-                if self.camera.target == self.player:
-                    self.camera.target = 0
-                else:
-                    self.camera.target = self.player
+            self.textbox.key_in(event)
+        else:
+            if self.test_level:
+                super(EditorState, self).eventHandler(event)
+            #check for key down
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
+                    self.editor_keys['up'] = True
+                if event.key == pygame.K_s:
+                    self.editor_keys['down'] = True
+                if event.key == pygame.K_a:
+                    self.editor_keys['left'] = True
+                if event.key == pygame.K_d:
+                    self.editor_keys['right'] = True
+                if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
+                    self.editor_keys['ctrl'] = True
+                if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
+                    self.editor_keys['shift'] = True
+            #check if for key up
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_w:
+                    self.editor_keys['up'] = False
+                if event.key == pygame.K_s:
+                    self.editor_keys['down'] = False
+                if event.key == pygame.K_a:
+                    self.editor_keys['left'] = False
+                if event.key == pygame.K_d:
+                    self.editor_keys['right'] = False
+                if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
+                    self.editor_keys['ctrl'] = False
+                if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
+                    self.editor_keys['shift'] = False
+                if event.key == pygame.K_1:
+                    self.tool = 0 #pen
+                    self.selected = []
+                if event.key == pygame.K_2:
+                    self.tool = 1 #eraser
+                    self.selected = []
+                if event.key == pygame.K_3:
+                    self.tool = 2 #selector
+                if event.key == pygame.K_7:
+                    self.draw_shape = 1
+                if event.key == pygame.K_8:
+                    self.draw_shape = 0
+                if event.key == pygame.K_9:
+                    self.draw_variables[self.selected_var] += 0.1
+                if event.key == pygame.K_0:
+                    self.draw_variables[self.selected_var] += 0.1
+                if event.key == pygame.K_p:
+                    self.test_level ^= True
+                    if self.camera.target == self.player:
+                        self.camera.target = 0
+                    else:
+                        self.camera.target = self.player
         #check if mouse downs
         if event.type == pygame.MOUSEBUTTONDOWN:
             #creates things 
@@ -217,8 +220,7 @@ class EditorState(GameState):
                         if not self.continue_draw:
                             #setup a new draw
                             self.origin = self.init_pos
-                            draw_entity = game_object.StaticObject(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], 1)
-                            self.current_draw = draw_entity
+                            self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)])
                             self.continue_draw = True
                         else:
                             #finish draw
@@ -240,12 +242,15 @@ class EditorState(GameState):
                             self.continue_draw = False
                     if self.tool == 2:
                         for entity in self.selected:
+                            #initilaze the drage
                             if entity.rect.collidepoint(self.init_pos):
                                 self.drag = True
                         if not self.drag:
+                            #resize the selecting rectangle
                             self.selector_rect.x = self.init_pos[0]
                             self.selector_rect.y = self.init_pos[1]
                         else:
+                            #set the select offset
                             for entity in self.selected:
                                 entity.select_offset = (entity.rect.x - self.init_pos[0], entity.rect.y - self.init_pos[1])
                 #change layer
@@ -283,55 +288,6 @@ class EditorState(GameState):
                     else:
                         self.drag = False
                         self.selected = []          
-    #function for initializing the menu
-    def initialize_menu(self):
-        '''
-        initializes the menu and the variables needed for it
-        '''
-        self.menu_back = pygame.Rect(0, 0, 200, 0) # height will get set in the draw method
-        #create the textbox for naming
-        self.textbox = textbox.TextBox(10, 10, 100, 50)
-        self.button_font_big = pygame.font.SysFont(None, 40)
-        self.button_font_small = pygame.font.SysFont(None, 20)
-        self.saveButton = button.Button(100, 100, self.button_font_big, (255,255,255), 100, 'Save')
-        #saves the game
-        def onSaveClick():
-            if len(self.textbox.text) > 0:
-                self.save_game(self.textbox.text, super(EditorState, self))
-        self.saveButton.onClick = onSaveClick
-        self.loadButton = button.Button(100, 200, self.button_font_big, (255,255,255), 100, 'Load')
-        #loads the game
-        def onLoadClick():
-            if len(self.textbox.text) > 0:
-                try:
-                    super(EditorState, self).load_game(self.textbox.text)
-                    self.test_level = False
-                    self.camera.viewport.centerx = self.player.rect.centerx 
-                    self.camera.viewport.centery = self.player.rect.centery
-                    self.camera.target = 0
-                except:
-                    pass
-        self.loadButton.onClick = onLoadClick
-        self.buttons = [self.saveButton, self.loadButton] #container for buttons
-        y_offset = 0
-        for var in self.draw_variables:
-            varButton = button.Button(100, 300+y_offset, self.button_font_small, (255,255,255), 100, str(var) + ': ' + str(self.draw_variables[var]))
-            def onVarClick():
-                self.selected_var = var
-            varButton.onClick = onVarClick
-            self.buttons.append(varButton)
-            y_offset += 20
-
-    def draw_menu(self, screen):
-        '''
-        draws the menu
-        '''
-        #draw background of the side bar
-        self.menu_back.height = screen.get_size()[1]
-        pygame.draw.rect(screen, (0,0,0), self.menu_back)
-        self.textbox.draw(screen)
-        for entity in self.buttons:
-            entity.draw(screen, self.camera)
 
     def calculate_offset(self, origin, position, rect):
         '''
@@ -345,9 +301,9 @@ class EditorState(GameState):
         if origin[1] == rect.bottomleft[1]:
             v = -1
         point_list = [(0,0), (0, v*(position[1]-origin[1])), (h*(position[0]-origin[0]), v*(position[1]-origin[1])), (h*(position[0]-origin[0]), 0)]
-        if self.draw_type == 0:
+        if self.draw_shape == 0:
             return point_list
-        elif self.draw_type == 1:
+        elif self.draw_shape == 1:
             if origin == rect.topleft:
                 point_list.pop(1)
             elif origin == rect.topright:
@@ -404,3 +360,90 @@ class EditorState(GameState):
         with open('../levels/' + name +'.txt', 'w') as file:
             # https://docs.python.org/2/library/json.html
             file.write(json.dumps(game.to_dictionary(), indent = 2))
+    
+    #function for initializing the menu
+    def initialize_menu(self):
+        '''
+        initializes the menu and the variables needed for it
+        '''
+        self.menu_back = pygame.Rect(0, 0, 200, 0) # height will get set in the draw method
+        #create the textbox for naming
+        self.textbox = textbox.TextBox(10, 10, 180, 0) # height will be set in the init
+        self.button_font_big = pygame.font.SysFont(None, 40)
+        self.button_font_small = pygame.font.SysFont(None, 20)
+        self.saveButton = button.Button(15, self.textbox.rect.bottom+4, self.button_font_big, (255,255,255), 100, 'Save', (0,0))
+        #saves the game
+        def onSaveClick():
+            if len(self.textbox.text) > 0:
+                self.save_game(self.textbox.text, super(EditorState, self))
+        self.saveButton.onClick = onSaveClick
+        self.saveButton.realign(self.camera)
+        self.buttons.append(self.saveButton)
+        #loads the game
+        self.loadButton = button.Button(105, self.textbox.rect.bottom+4, self.button_font_big, (255,255,255), 100, 'Load', (0,0))
+        def onLoadClick():
+            if len(self.textbox.text) > 0:
+                try:
+                    super(EditorState, self).load_game(self.textbox.text)
+                    self.test_level = False
+                    self.camera.viewport.centerx = self.player.rect.centerx 
+                    self.camera.viewport.centery = self.player.rect.centery
+                    self.camera.target = 0
+                except:
+                    pass
+        self.loadButton.onClick = onLoadClick
+        self.loadButton.realign(self.camera)
+        self.buttons.append(self.loadButton)
+        #resets the game
+        self.resetButton = button.Button(15, self.loadButton.rect.bottom+10, self.button_font_big, (255,255,255), 100, 'Reset', (0,0))
+        def onResetClick():
+            for entity in self.gameEntities:
+                if entity.dynamic:
+                    entity.reset()
+            self.test_level = False
+            #reset the camera to the player
+            self.camera.target = 0
+            self.camera.viewport.centerx = self.player.rect.centerx 
+            self.camera.viewport.centery = self.player.rect.centery
+        self.resetButton.onClick = onResetClick
+        self.resetButton.realign(self.camera)
+        self.buttons.append(self.resetButton)
+        #sets draw type to static
+        self.staticButton = button.Button(15, -100, self.button_font_big, (255,255,255), 100, 'Static', (0,1))
+        def onStaticClick():
+            self.draw_type = game_object.StaticObject
+        self.staticButton.onClick = onStaticClick
+        self.staticButton.realign(self.camera)
+        self.buttons.append(self.staticButton)
+        #sets draw type to dynamic
+        self.dynamicButton = button.Button(15, -200, self.button_font_big, (255,255,255), 100, 'Dynamic', (0,1))
+        def onDynamicClick():
+            self.draw_type = game_object.DynamicObject
+        self.dynamicButton.onClick = onDynamicClick
+        self.dynamicButton.realign(self.camera)
+        self.buttons.append(self.dynamicButton)
+        #load the variables that can be edited
+        self.entity_variables(game_object.StaticObject)
+        
+    def entity_variables(self, type):
+        entity_var = type.ATTRIBUTES
+        y_offset = 20
+        for var in entity_var:
+            varButton = button.Button(100, 300+y_offset, self.button_font_small, (255,255,255), 100, str(var) + ': ' + str(entity_var[var]), (0,0))
+            varButton.realign(self.camera)
+            def onVarClick():
+                self.selected_var = var
+            varButton.onClick = onVarClick
+            self.buttons.append(varButton)
+            y_offset += 20
+        
+    def draw_menu(self, screen):
+        '''
+        draws the menu
+        '''
+        #draw background of the side bar
+        self.menu_back.height = screen.get_size()[1]
+        pygame.draw.rect(screen, (0,0,0), self.menu_back)
+        self.textbox.draw(screen)
+        for entity in self.buttons:
+            entity.draw(screen, self.camera)

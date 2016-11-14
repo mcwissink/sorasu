@@ -11,12 +11,12 @@ import utilities
 
 #base class for all object in game
 class GameObject(object):
-    def __init__(self, x, y, offsets, parallax):
+    #these are the parameters that you can edit in the editor
+    def __init__(self, x, y, offsets):
         self.type = 'scenery'
         self.color = (0,0,0)
         self.dynamic = False
         self.offsets = offsets
-        self.parallax = parallax
         self.select_offset = (0, 0) #used for dragging
         #this is a collision bounding box for select and improved collision checks
         x_offsets = [offset[0] for offset in offsets]
@@ -40,17 +40,17 @@ class GameObject(object):
         return {
                 'x' : self.rect.x, 
                 'y': self.rect.y,
-                'parallax' : self.parallax,
                 'offsets' : self.offsets
                }
 
 #includes any objects that are simply scenery
 class StaticObject(GameObject):
-    def __init__(self, x, y, offsets, parallax, ground_fric=0.1, wall_fric=0.1):
-        GameObject.__init__(self, x, y, offsets, parallax)
+    #these are the parameters that you can edit in the editor
+    ATTRIBUTES = {'Friction':0.1}
+    def __init__(self, x, y, offsets, friction=0.1):
+        GameObject.__init__(self, x, y, offsets)
         self.type = 'static'
-        self.ground_fric = ground_fric
-        self.wall_fric = wall_fric
+        self.friction = friction
     def update(self, dt):
         pass
     def draw(self, screen, camera):
@@ -60,15 +60,17 @@ class StaticObject(GameObject):
         #http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
         return utilities.merge_dicts(GameObject.to_dictionary(self),
                 {
-                'ground_fric' : self.ground_fric,
-                'wall_fric' : self.wall_fric})
+                'friction' : self.friction})
 
 #includes any objects that collide with player
 class DynamicObject(GameObject):
+    #these are the parameters that you can edit in the editor
+    ATTRIBUTES = {'Mass':10}
     #create universal gravity constant
     GRAVITY = 100
-    def __init__(self, x, y, offsets, parallax, mass=1):
-        GameObject.__init__(self, x, y, offsets, parallax)
+    def __init__(self, x, y, offsets, mass=10):
+        GameObject.__init__(self, x, y, offsets)
+        self.spawn = (x, y)
         self.type = 'dynamic'
         self.dynamic = True 
         self.vel = pygame.math.Vector2(0,0)
@@ -118,3 +120,10 @@ class DynamicObject(GameObject):
         return utilities.merge_dicts(GameObject.to_dictionary(self),
                 {
                 'mass' : self.mass})
+    def reset(self):
+        '''resets the variable and sends it to the spawn point'''
+        self.vel *= 0
+        self.rect.x = self.spawn[0]
+        self.rect.y = self.spawn[1]
+        self.pos[0] = self.rect.x
+        self.pos[1] = self.rect.y

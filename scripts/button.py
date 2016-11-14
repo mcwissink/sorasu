@@ -41,7 +41,7 @@ def buttons_mouseup(parent):
         else:
             parent.last_click.font.set_bold(False)
             parent.last_click.label = parent.last_click.font.render(parent.last_click.text, 1, parent.last_click.color)
-            parent.last_click = None
+    parent.last_click = None
 
 def checkButtons(parent, mouse):
         '''
@@ -53,12 +53,14 @@ def checkButtons(parent, mouse):
     
 #base class for all object in game
 class Button():
-    def __init__(self, x, y, font, color, size, text, returning=False):
+    def __init__(self, x, y, font, color, size, text, align, returning=False):
         '''
         initialize button
         '''
         #store necessary variables
         #if centered, use x and y as offsets
+        self.offset = (x, y)
+        self.align = align # percent value for positioning on screen
         self.hover = 0 # for coloring the button 
         self.returning = returning #used if a button has to return a state
         self.color = color
@@ -67,9 +69,7 @@ class Button():
         self.label = self.font.render(self.text, 1, self.color)
         width, height = font.size(self.text)
         self.rect = pygame.Rect(x, y, width, height)
-        #center the button
-        self.rect.centerx = self.rect.x
-        self.rect.centery = self.rect.y
+
     def update(self, mouse):
         '''updates the button'''
         #this resets the color only once, instead of everyframe
@@ -86,3 +86,10 @@ class Button():
         draw the button
         '''
         screen.blit(self.label, (self.rect.x, self.rect.y))
+        
+    def realign(self, camera):
+        '''
+        realigns the button based on the percent given to align
+        '''
+        self.rect.x = camera.viewport.width*self.align[0] + self.offset[0]
+        self.rect.y = camera.viewport.height*self.align[1] + self.offset[1]

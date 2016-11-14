@@ -1,7 +1,60 @@
 {
+  "staticEntities": [
+    {
+      "y": 134,
+      "offsets": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          80
+        ],
+        [
+          258,
+          80
+        ],
+        [
+          258,
+          0
+        ]
+      ],
+      "friction": 0.1,
+      "x": -163,
+      "parallax": 1
+    },
+    {
+      "y": -226,
+      "offsets": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          441
+        ],
+        [
+          124,
+          441
+        ],
+        [
+          124,
+          0
+        ]
+      ],
+      "friction": 0.1,
+      "x": 95,
+      "parallax": 1
+    }
+  ],
+  "foreGroundEntities": [],
+  "dynamicEntities": [],
+  "backGroundEntities": [],
   "player": {
-    "y": -683,
-    "x": 107,
+    "parallax": 1,
+    "y": 0,
     "offsets": [
       [
         0,
@@ -20,158 +73,7 @@
         0
       ]
     ],
-    "parallax": 1,
-    "mass": 30
-  },
-  "staticEntities": [
-    {
-      "y": -119,
-      "x": -233,
-      "offsets": [
-        [
-          0,
-          0
-        ],
-        [
-          0,
-          124
-        ],
-        [
-          376,
-          124
-        ],
-        [
-          376,
-          0
-        ]
-      ],
-      "ground_fric": 0.1,
-      "wall_fric": 0.1,
-      "parallax": 1
-    },
-    {
-      "y": 112,
-      "x": -202,
-      "offsets": [
-        [
-          0,
-          0
-        ],
-        [
-          0,
-          103
-        ],
-        [
-          346,
-          103
-        ],
-        [
-          346,
-          0
-        ]
-      ],
-      "ground_fric": 0.1,
-      "wall_fric": 0.1,
-      "parallax": 1
-    },
-    {
-      "y": -260,
-      "x": 192,
-      "offsets": [
-        [
-          0,
-          0
-        ],
-        [
-          0,
-          470
-        ],
-        [
-          212,
-          470
-        ],
-        [
-          212,
-          0
-        ]
-      ],
-      "ground_fric": 0.1,
-      "wall_fric": 0.1,
-      "parallax": 1
-    },
-    {
-      "y": -900,
-      "x": -233,
-      "offsets": [
-        [
-          0,
-          781
-        ],
-        [
-          257,
-          781
-        ],
-        [
-          257,
-          0
-        ]
-      ],
-      "ground_fric": 0.1,
-      "wall_fric": 0.1,
-      "parallax": 1
-    },
-    {
-      "y": -438,
-      "x": 68,
-      "offsets": [
-        [
-          0,
-          0
-        ],
-        [
-          0,
-          236
-        ],
-        [
-          38,
-          236
-        ],
-        [
-          38,
-          0
-        ]
-      ],
-      "ground_fric": 0.1,
-      "wall_fric": 0.1,
-      "parallax": 1
-    },
-    {
-      "y": -1185,
-      "x": 615,
-      "offsets": [
-        [
-          0,
-          0
-        ],
-        [
-          0,
-          407
-        ],
-        [
-          338,
-          407
-        ],
-        [
-          338,
-          0
-        ]
-      ],
-      "ground_fric": 0.1,
-      "wall_fric": 0.1,
-      "parallax": 1
-    }
-  ],
-  "dynamicEntities": [],
-  "foreGroundEntities": [],
-  "backGroundEntities": []
+    "x": 0,
+    "mass": 10
+  }
 }
