@@ -18,9 +18,8 @@ from player import Player
 class EditorState(GameState):
     def __init__(self, file_name=None):
         '''
-        initiate the game
-        '''
-        
+        initiate the editor
+        '''  
         super(EditorState, self).__init__(file_name)
         if file_name is None:
             self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], 10)
@@ -34,15 +33,10 @@ class EditorState(GameState):
         pygame.mouse.set_visible(True) # Make the mouse invisible
         #set up editor specific values and draws and buttons
         button.buttons_init(self)
+        self.attr_selected = None
         self.editor_keys = {'up': False, 'down': False, 'left': False, 'right': False, 'ctrl': False, 'shift': False} #dictionary for key presses
         self.test_level = False
-        self.selected_var = 'Parallax'
-        self.draw_variables = { #variables for drawing things
-                                'Parallax: ': 1, 
-                                'Scale: ': 1, 
-                                'Friction': 0.1, 
-                                'Wall Friction': 0.1
-                               }
+        #create the menu
         self.initialize_menu()
         #variables for all the editing
         self.snap_to = (0, 0)
@@ -57,12 +51,13 @@ class EditorState(GameState):
         self.selector_rect = pygame.Rect(0,0,0,0) #used for selecting objects
         self.selected = [] #list for selected objects
         self.drag = False #used for selector
+        
     def update(self, dt):
         '''
         loop through objects and run logic
         '''      
         #update the editor buttons
-        button.buttons_update(self)
+        button.buttons_update(self, self.buttons)
         #update the current snap function visuals
         position = self.camera.apply_inverse(pygame.mouse.get_pos())
         if self.editor_keys['ctrl']:
@@ -195,9 +190,9 @@ class EditorState(GameState):
                 if event.key == pygame.K_8:
                     self.draw_shape = 0
                 if event.key == pygame.K_9:
-                    self.draw_variables[self.selected_var] += 0.1
+                    self.self.attr_selected += 0.1
                 if event.key == pygame.K_0:
-                    self.draw_variables[self.selected_var] += 0.1
+                    self.self.attr_selected += 0.1
                 if event.key == pygame.K_p:
                     self.test_level ^= True
                     if self.camera.target == self.player:
@@ -208,7 +203,7 @@ class EditorState(GameState):
         if event.type == pygame.MOUSEBUTTONDOWN:
             #creates things 
             if self.menu_back.collidepoint(pygame.mouse.get_pos()):
-                button.buttons_mousedown(self)
+                button.buttons_mousedown(self, self.buttons)
             else:
                 if pygame.mouse.get_pressed()[0]:
                     self.init_pos = self.camera.apply_inverse(pygame.mouse.get_pos())
@@ -255,11 +250,9 @@ class EditorState(GameState):
                                 entity.select_offset = (entity.rect.x - self.init_pos[0], entity.rect.y - self.init_pos[1])
                 #change layer
                 elif event.button == 4:
-                    self.parallax = min(self.parallax + 1, 10)
-                    print(self.parallax)
+                    self.attr_selected.value = min(self.attr_selected.value + 0.1, 10)
                 elif event.button == 5:
-                    self.parallax = max(self.parallax - 1, 0)
-                    print(self.parallax)               
+                    self.attr_selected.value = max(self.attr_selected.value - 0.1, 0)              
         #check if mouse up
         if event.type == pygame.MOUSEBUTTONUP:
             #clicking in the menu
@@ -268,7 +261,7 @@ class EditorState(GameState):
                     self.textbox.active = True
                 else:
                     self.textbox.active = False
-                button.buttons_mouseup(self)
+                button.buttons_mouseup(self, self.buttons)
             #clicking not in the menu
             else:
                 self.textbox.active = False 
@@ -425,18 +418,17 @@ class EditorState(GameState):
         #load the variables that can be edited
         self.entity_variables(game_object.StaticObject)
         
-    def entity_variables(self, type):
-        entity_var = type.ATTRIBUTES
+    def entity_variables(self, entity_type):
+        entity_var = entity_type.ATTRIBUTES
         y_offset = 20
         for var in entity_var:
-            varButton = button.Button(100, 300+y_offset, self.button_font_small, (255,255,255), 100, str(var) + ': ' + str(entity_var[var]), (0,0))
-            varButton.realign(self.camera)
+            varButton = button.Button(100, 300+y_offset, self.button_font_small, (255,255,255), 100, var+':', (0,0), False, entity_var[var])
             def onVarClick():
-                self.selected_var = var
+                self.attr_selected = varButton
             varButton.onClick = onVarClick
             self.buttons.append(varButton)
             y_offset += 20
-        
+    
     def draw_menu(self, screen):
         '''
         draws the menu
@@ -445,5 +437,5 @@ class EditorState(GameState):
         self.menu_back.height = screen.get_size()[1]
         pygame.draw.rect(screen, (0,0,0), self.menu_back)
         self.textbox.draw(screen)
-        for entity in self.buttons:
-            entity.draw(screen, self.camera)
+        button.buttons_draw(self, screen, self.buttons)
+        

@@ -22,7 +22,6 @@ class GameState():
         self.gameEntities = [] #blocks and other objects that collide
         self.backGroundEntities = [] #scenery and other things that don't collide
         self.foreGroundEntities = [] #scenery and other things that don't collide
-        self.buttons = [] # list for buttons
         #load the file
         self.player = None
         self.file_name = file_name

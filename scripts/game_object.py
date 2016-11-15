@@ -52,9 +52,8 @@ class StaticObject(GameObject):
         self.type = 'static'
         self.friction = friction
     def update(self, dt):
+        #might use in the future
         pass
-    def draw(self, screen, camera):
-        GameObject.draw(self, screen, camera)
     def to_dictionary(self):
         '''creates a dictionary of variables for saving specifically for Static Objects''' 
         #http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
@@ -112,9 +111,6 @@ class DynamicObject(GameObject):
                                 self.onwall = 1
                             else:
                                 self.onwall = -1
-    def draw(self, screen, camera):
-        GameObject.draw(self, screen, camera)
-    
     def to_dictionary(self):
         '''creates a dictionary of variables for saving specifically for Dynamic Objects'''
         return utilities.merge_dicts(GameObject.to_dictionary(self),

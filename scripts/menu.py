@@ -48,7 +48,7 @@ class MenuState():
         '''
         loop through objects and run logic
         '''
-        button.buttons_update(self)
+        button.buttons_update(self, self.buttons)
         self.camera.update(self.keys, dt)
         
     def draw(self, draw, screen):
@@ -58,8 +58,7 @@ class MenuState():
         screen.fill(pygame.Color(255, 255, 255))
         #draw logo
         self.draw_logo(screen, self.camera)
-        for entity in self.buttons:
-            entity.draw(screen, self.camera)
+        button.buttons_draw(self, screen, self.buttons)
             
     def eventHandler(self, event):
         '''
@@ -87,11 +86,11 @@ class MenuState():
                 self.keys['right'] = False
         #check if mouse downs
         if event.type == pygame.MOUSEBUTTONDOWN:
-            button.buttons_mousedown(self)
+            button.buttons_mousedown(self, self.buttons)
         #check if mouse up
         if event.type == pygame.MOUSEBUTTONUP:
             #uses return in this case since we are switching states
-            return button.buttons_mouseup(self)
+            return button.buttons_mouseup(self, self.buttons)
     
     def draw_logo(self, screen, camera):
         '''
