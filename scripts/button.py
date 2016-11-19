@@ -60,7 +60,7 @@ def checkButtons(buttons, mouse):
     
 #base class for all object in game
 class Button():
-    def __init__(self, x, y, font, color, size, text, align, returning=False, value=''):
+    def __init__(self, x, y, font, color, size, text, align, returning=False, value='', attr=''):
         '''
         initialize button
         '''
@@ -73,6 +73,7 @@ class Button():
         self.color = color
         self.text = text
         self.value = value #if the buttun has a changing value
+        self.attr = attr #for remembering what attribute is being stored
         self.font = font
         self.label = self.font.render(self.text, 1, self.color)
         width, height = font.size(self.text)

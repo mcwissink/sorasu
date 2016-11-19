@@ -22,7 +22,7 @@ class EditorState(GameState):
         '''  
         super(EditorState, self).__init__(file_name)
         if file_name is None:
-            self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], 10)
+            self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], [10])
             self.gameEntities.append(self.player)
             self.camera = Camera(900, 600, 0)
             self.camera.resize(pygame.display.get_surface())
@@ -33,6 +33,7 @@ class EditorState(GameState):
         pygame.mouse.set_visible(True) # Make the mouse invisible
         #set up editor specific values and draws and buttons
         button.buttons_init(self)
+        self.attr_buttons = [] #used to store specific buttons
         self.attr_selected = None
         self.editor_keys = {'up': False, 'down': False, 'left': False, 'right': False, 'ctrl': False, 'shift': False} #dictionary for key presses
         self.test_level = False
@@ -215,7 +216,7 @@ class EditorState(GameState):
                         if not self.continue_draw:
                             #setup a new draw
                             self.origin = self.init_pos
-                            self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)])
+                            self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [self.attr_buttons[0].value])
                             self.continue_draw = True
                         else:
                             #finish draw
@@ -250,9 +251,11 @@ class EditorState(GameState):
                                 entity.select_offset = (entity.rect.x - self.init_pos[0], entity.rect.y - self.init_pos[1])
                 #change layer
                 elif event.button == 4:
-                    self.attr_selected.value = min(self.attr_selected.value + 0.1, 10)
+                    attr_ref = self.draw_type.ATTRIBUTES[self.attr_selected.attr]
+                    self.attr_selected.value = round(min(self.attr_selected.value + attr_ref['step'], attr_ref['max']), 3)
                 elif event.button == 5:
-                    self.attr_selected.value = max(self.attr_selected.value - 0.1, 0)              
+                    attr_ref = self.draw_type.ATTRIBUTES[self.attr_selected.attr]
+                    self.attr_selected.value = round(max(self.attr_selected.value - attr_ref['step'], attr_ref['min']), 3)           
         #check if mouse up
         if event.type == pygame.MOUSEBUTTONUP:
             #clicking in the menu
@@ -405,6 +408,7 @@ class EditorState(GameState):
         self.staticButton = button.Button(15, -100, self.button_font_big, (255,255,255), 100, 'Static', (0,1))
         def onStaticClick():
             self.draw_type = game_object.StaticObject
+            self.entity_variables(100, 300, self.draw_type)
         self.staticButton.onClick = onStaticClick
         self.staticButton.realign(self.camera)
         self.buttons.append(self.staticButton)
@@ -412,23 +416,35 @@ class EditorState(GameState):
         self.dynamicButton = button.Button(15, -200, self.button_font_big, (255,255,255), 100, 'Dynamic', (0,1))
         def onDynamicClick():
             self.draw_type = game_object.DynamicObject
+            self.entity_variables(100, 300, self.draw_type)
         self.dynamicButton.onClick = onDynamicClick
         self.dynamicButton.realign(self.camera)
         self.buttons.append(self.dynamicButton)
         #load the variables that can be edited
-        self.entity_variables(game_object.StaticObject)
+        self.entity_variables(100, 300, game_object.StaticObject) #this would normally pass in self.draw_type
         
-    def entity_variables(self, entity_type):
+    def entity_variables(self, x, y, entity_type):
+        #clear the current buttons in the list
+        for attr_button in self.attr_buttons:
+            if attr_button in self.buttons:
+                self.buttons.remove(attr_button)
+        self.attr_buttons[:] = []
         entity_var = entity_type.ATTRIBUTES
-        y_offset = 20
+        y_offset = 0 #used for vertical spacing
+        '''treat this as one big button and get the y of the mouse to find which button is clicked'''
         for var in entity_var:
-            varButton = button.Button(100, 300+y_offset, self.button_font_small, (255,255,255), 100, var+':', (0,0), False, entity_var[var])
+            varButton = button.Button(x, y + y_offset, self.button_font_small, (255,255,255), 100, var+':', (0,0), False, entity_var[var]['init'], var)
             def onVarClick():
-                self.attr_selected = varButton
+                '''get location of mouse click'''
+                for i in range(len(self.attr_buttons)):
+                    if y + (varButton.rect.height * (i+1)) > pygame.mouse.get_pos()[1]:
+                        self.attr_selected = self.attr_buttons[i]
+                        break
             varButton.onClick = onVarClick
-            self.buttons.append(varButton)
-            y_offset += 20
-    
+            y_offset += varButton.rect.height
+            self.attr_buttons.append(varButton)
+        self.attr_selected = varButton
+        self.buttons += self.attr_buttons
     def draw_menu(self, screen):
         '''
         draws the menu
