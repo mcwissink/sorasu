@@ -1,89 +1,8 @@
 {
-  "staticEntities": [
-    {
-      "x": -183,
-      "attributes": [
-        1
-      ],
-      "offsets": [
-        [
-          0,
-          0
-        ],
-        [
-          0,
-          296
-        ],
-        [
-          322,
-          296
-        ],
-        [
-          322,
-          0
-        ]
-      ],
-      "y": 65
-    },
-    {
-      "x": 139,
-      "attributes": [
-        1
-      ],
-      "offsets": [
-        [
-          0,
-          0
-        ],
-        [
-          0,
-          584
-        ],
-        [
-          36,
-          584
-        ],
-        [
-          36,
-          0
-        ]
-      ],
-      "y": -223
-    },
-    {
-      "x": -183,
-      "attributes": [
-        1
-      ],
-      "offsets": [
-        [
-          0,
-          0
-        ],
-        [
-          0,
-          320
-        ],
-        [
-          55,
-          320
-        ],
-        [
-          55,
-          0
-        ]
-      ],
-      "y": -255
-    }
-  ],
-  "foreGroundEntities": [],
   "dynamicEntities": [],
-  "backGroundEntities": [],
+  "staticEntities": [],
   "player": {
-    "x": 0,
-    "attributes": [
-      10
-    ],
+    "y": 0,
     "offsets": [
       [
         0,
@@ -102,6 +21,38 @@
         0
       ]
     ],
-    "y": 0
-  }
+    "x": 0,
+    "attributes": [
+      10
+    ]
+  },
+  "backGroundEntities": [
+    {
+      "y": -138,
+      "offsets": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          105
+        ],
+        [
+          182,
+          105
+        ],
+        [
+          182,
+          0
+        ]
+      ],
+      "x": -97,
+      "attributes": [
+        1,
+        0.1
+      ]
+    }
+  ],
+  "foreGroundEntities": []
 }

@@ -11,8 +11,8 @@ class Player(DynamicObject):
     ''' 
     Player game object for moving your character around
     '''
-    def __init__(self, x, y, offsets, mass):
-        DynamicObject.__init__(self, x, y, offsets, mass)
+    def __init__(self, x, y, offsets, attributes):
+        DynamicObject.__init__(self, x, y, offsets, attributes)
         self.type = 'player'
         self.color = (255,0,0)
         self.past_up = self.past_down = self.past_left = self.past_right = True # Past key presses

@@ -17,13 +17,12 @@ def main():
     pygame.init() #initiate pygame
     screen = pygame.display.set_mode((900, 600), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
     clock = pygame.time.Clock() #initiates clock for time usage, such as deltatime and fps
-    frameRate = 0
     pygame.display.set_caption('Sorasu') #set the title of the application
     pygame.display.set_icon(utilities.load('icon.png')) #set image for application
     currentState = MenuState()
     #main game loop
     while True:
-        deltaTime = clock.tick(frameRate)/1000.0 #get time pasted between each frame in seconds
+        deltaTime = clock.tick()/1000.0 #get time pasted between each frame in seconds
         for event in pygame.event.get():
             if event.type == pygame.QUIT: #if the application is closed - terminate all processes
                 pygame.quit()
@@ -35,7 +34,7 @@ def main():
                     currentState.camera.resize(screen)
                 #realign buttons
                 for button in currentState.buttons:
-                    button.realign(currentState.camera) 
+                    button.realign(currentState.camera)
             else:
                 currentState = currentState.eventHandler(event) or currentState
         currentState.draw(pygame.draw, screen)

@@ -119,8 +119,8 @@ class GameState():
         static = [game_object.StaticObject(**{key: value for (key, value) in i.items()}) for i in dictionary['staticEntities']]
         self.gameEntities = dynamic + static
         self.gameEntities.append(self.player)
-        self.backGroundEntities = [game_object.GameObject(**{key: value for (key, value) in i.items()}) for i in dictionary['backGroundEntities']]
-        self.foreGroundEntities = [game_object.GameObject(**{key: value for (key, value) in i.items()}) for i in dictionary['foreGroundEntities']]
+        self.backGroundEntities = [game_object.SceneryObject(**{key: value for (key, value) in i.items()}) for i in dictionary['backGroundEntities']]
+        self.foreGroundEntities = [game_object.SceneryObject(**{key: value for (key, value) in i.items()}) for i in dictionary['foreGroundEntities']]
     
     def load_game(self, file_name):
         '''

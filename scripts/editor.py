@@ -27,8 +27,8 @@ class EditorState(GameState):
             self.camera = Camera(900, 600, 0)
             self.camera.resize(pygame.display.get_surface())
         #center the camera on the player
-        self.camera.viewport.centerx = self.player.rect.centerx 
-        self.camera.viewport.centery = self.player.rect.centery
+        self.camera.viewport.x = self.player.rect.centerx 
+        self.camera.viewport.y = self.player.rect.centery
         self.camera.target = 0
         pygame.mouse.set_visible(True) # Make the mouse invisible
         #set up editor specific values and draws and buttons
@@ -40,6 +40,7 @@ class EditorState(GameState):
         #create the menu
         self.initialize_menu()
         #variables for all the editing
+        self.parallax = 1
         self.snap_to = (0, 0)
         self.line_to = [(0, 0), (0, 0)]
         self.init_pos = (0, 0)
@@ -56,11 +57,13 @@ class EditorState(GameState):
     def update(self, dt):
         '''
         loop through objects and run logic
-        '''      
+        '''
+        if self.draw_type == game_object.SceneryObject:
+            self.parallax = self.attr_buttons[0].value
         #update the editor buttons
         button.buttons_update(self, self.buttons)
         #update the current snap function visuals
-        position = self.camera.apply_inverse(pygame.mouse.get_pos())
+        position = self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax)
         if self.editor_keys['ctrl']:
             self.snap_to = self.snap_to_corner(position, self.gameEntities)
         else:
@@ -132,11 +135,11 @@ class EditorState(GameState):
         #draw debug visuals
         # entity.debug_draw(screen, self.camera)
         if self.editor_keys['ctrl']:
-            pygame.draw.circle(screen, (255,0,0), self.camera.apply_single(self.snap_to), 7, 2)
+            pygame.draw.circle(screen, (255,0,0), self.camera.apply_single(self.snap_to, self.parallax), 7, 2)
         if self.editor_keys['shift']:
-            pygame.draw.line(screen, (255,0,0), self.camera.apply_single(self.line_to[0]), self.camera.apply_single(self.line_to[1]), 2)
+            pygame.draw.line(screen, (255,0,0), self.camera.apply_single(self.line_to[0], self.parallax), self.camera.apply_single(self.line_to[1], self.parallax), 2)
         if pygame.mouse.get_pressed()[0] and self.tool == 2 and not self.drag:
-            position = self.camera.apply_single((self.selector_rect.x, self.selector_rect.y))
+            position = self.camera.apply_single((self.selector_rect.x, self.selector_rect.y), self.parallax)
             pygame.draw.rect(screen, (255,0,0), (position[0], position[1], self.selector_rect.width, self.selector_rect.height), 2)
         #draw the editor over top everything
         self.draw_menu(screen)
@@ -195,7 +198,7 @@ class EditorState(GameState):
                 if event.key == pygame.K_0:
                     self.self.attr_selected += 0.1
                 if event.key == pygame.K_p:
-                    self.test_level ^= True
+                    self.test_level = not self.test_level
                     if self.camera.target == self.player:
                         self.camera.target = 0
                     else:
@@ -207,16 +210,16 @@ class EditorState(GameState):
                 button.buttons_mousedown(self, self.buttons)
             else:
                 if pygame.mouse.get_pressed()[0]:
-                    self.init_pos = self.camera.apply_inverse(pygame.mouse.get_pos())
+                    self.init_pos = self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax)
                     if self.tool == 0:
                         if self.editor_keys['ctrl']:
-                            self.init_pos = self.snap_to_corner(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)
+                            self.init_pos = self.snap_to_corner(self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax), self.gameEntities)
                         elif self.editor_keys['shift']:
-                            self.init_pos = self.snap_to_plane(self.camera.apply_inverse(pygame.mouse.get_pos()), self.gameEntities)[1] 
+                            self.init_pos = self.snap_to_plane(self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax), self.gameEntities)[1] 
                         if not self.continue_draw:
                             #setup a new draw
                             self.origin = self.init_pos
-                            self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [self.attr_buttons[0].value])
+                            self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons])
                             self.continue_draw = True
                         else:
                             #finish draw
@@ -227,18 +230,18 @@ class EditorState(GameState):
                             elif self.editor_keys['shift']:
                                 position = self.line_to[1]
                             else:
-                                position = self.camera.apply_inverse(pygame.mouse.get_pos())
+                                position = self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax)
                             self.current_draw.rect.normalize()
                             self.current_draw.offsets = self.calculate_offset(self.origin, position, self.current_draw.rect)
                             #delete object if it is too small
                             
                             if not (self.current_draw.rect.width < 0.1 or self.current_draw.rect.height < 0.1):
-                                self.gameEntities.append(self.current_draw)
+                                self.get_layer().append(self.current_draw)
                             self.current_draw = None
                             self.continue_draw = False
                     if self.tool == 2:
                         for entity in self.selected:
-                            #initilaze the drage
+                            #initiliaze the drag
                             if entity.rect.collidepoint(self.init_pos):
                                 self.drag = True
                         if not self.drag:
@@ -249,13 +252,13 @@ class EditorState(GameState):
                             #set the select offset
                             for entity in self.selected:
                                 entity.select_offset = (entity.rect.x - self.init_pos[0], entity.rect.y - self.init_pos[1])
-                #change layer
+                #change button attributes
                 elif event.button == 4:
-                    attr_ref = self.draw_type.ATTRIBUTES[self.attr_selected.attr]
-                    self.attr_selected.value = round(min(self.attr_selected.value + attr_ref['step'], attr_ref['max']), 3)
+                    attr_ref = self.draw_type.ATTRIBUTES[self.attr_selected]
+                    self.attr_buttons[self.attr_selected].value = round(min(self.attr_buttons[self.attr_selected].value + attr_ref['step'], attr_ref['max']), 3)
                 elif event.button == 5:
-                    attr_ref = self.draw_type.ATTRIBUTES[self.attr_selected.attr]
-                    self.attr_selected.value = round(max(self.attr_selected.value - attr_ref['step'], attr_ref['min']), 3)           
+                    attr_ref = self.draw_type.ATTRIBUTES[self.attr_selected]
+                    self.attr_buttons[self.attr_selected].value = round(max(self.attr_buttons[self.attr_selected].value - attr_ref['step'], attr_ref['min']), 3)           
         #check if mouse up
         if event.type == pygame.MOUSEBUTTONUP:
             #clicking in the menu
@@ -341,13 +344,16 @@ class EditorState(GameState):
             if entity_list[i].rect.collidepoint(position):
                 entity_list.pop(i)
                 
-    def get_layer(self, z):
-        if z == 1:
-            return self.gameEntities
-        elif z < 0:
-            return self.backGroundEntities
+    def get_layer(self):
+        '''gets the layer for drawing'''
+        if self.draw_type == game_object.SceneryObject:
+            if self.current_draw.parallax > 1:
+                return self.foreGroundEntities
+            else:
+                return self.backGroundEntities
         else:
-            return self.foreGroundEntities
+            return self.gameEntities
+            
         
     def save_game(self, name, game):
         '''
@@ -385,7 +391,8 @@ class EditorState(GameState):
                     self.camera.viewport.centerx = self.player.rect.centerx 
                     self.camera.viewport.centery = self.player.rect.centery
                     self.camera.target = 0
-                except:
+                except Exception as e:
+                    print(e)
                     pass
         self.loadButton.onClick = onLoadClick
         self.loadButton.realign(self.camera)
@@ -409,17 +416,27 @@ class EditorState(GameState):
         def onStaticClick():
             self.draw_type = game_object.StaticObject
             self.entity_variables(100, 300, self.draw_type)
+            self.parallax = 1
         self.staticButton.onClick = onStaticClick
         self.staticButton.realign(self.camera)
         self.buttons.append(self.staticButton)
         #sets draw type to dynamic
-        self.dynamicButton = button.Button(15, -200, self.button_font_big, (255,255,255), 100, 'Dynamic', (0,1))
+        self.dynamicButton = button.Button(15, -150, self.button_font_big, (255,255,255), 100, 'Dynamic', (0,1))
         def onDynamicClick():
             self.draw_type = game_object.DynamicObject
             self.entity_variables(100, 300, self.draw_type)
+            self.parallax = 1
         self.dynamicButton.onClick = onDynamicClick
         self.dynamicButton.realign(self.camera)
         self.buttons.append(self.dynamicButton)
+        #sets draw type to Scenery
+        self.sceneryButton = button.Button(15, -200, self.button_font_big, (255,255,255), 100, 'Scenery', (0,1))
+        def onSceneryClick():
+            self.draw_type = game_object.SceneryObject
+            self.entity_variables(100, 300, self.draw_type)
+        self.sceneryButton.onClick = onSceneryClick
+        self.sceneryButton.realign(self.camera)
+        self.buttons.append(self.sceneryButton)
         #load the variables that can be edited
         self.entity_variables(100, 300, game_object.StaticObject) #this would normally pass in self.draw_type
         
@@ -433,17 +450,17 @@ class EditorState(GameState):
         y_offset = 0 #used for vertical spacing
         '''treat this as one big button and get the y of the mouse to find which button is clicked'''
         for var in entity_var:
-            varButton = button.Button(x, y + y_offset, self.button_font_small, (255,255,255), 100, var+':', (0,0), False, entity_var[var]['init'], var)
+            varButton = button.Button(x, y + y_offset, self.button_font_small, (255,255,255), 100, var['name']+':', (0,0), False, var['init'], var['name'])
             def onVarClick():
                 '''get location of mouse click'''
                 for i in range(len(self.attr_buttons)):
                     if y + (varButton.rect.height * (i+1)) > pygame.mouse.get_pos()[1]:
-                        self.attr_selected = self.attr_buttons[i]
+                        self.attr_selected = i
                         break
             varButton.onClick = onVarClick
             y_offset += varButton.rect.height
             self.attr_buttons.append(varButton)
-        self.attr_selected = varButton
+        self.attr_selected = 0
         self.buttons += self.attr_buttons
     def draw_menu(self, screen):
         '''

@@ -15,28 +15,32 @@ class Camera(object):
             self.target = target
         except:
             self.target = 0
-    def apply(self, points):
+    def apply(self, points, parallax=1):
         '''
-        applies camera logic to multiple points
+        position relative to parallax
         '''
         for i in range(len(points)):
-            points[i] = (points[i][0] - self.viewport.x, points[i][1] - self.viewport.y)
+            translate_x = points[i][0] - self.viewport.x * parallax + self.viewport.width//2
+            translate_y = points[i][1] - self.viewport.y * parallax + self.viewport.height//2
+            points[i] = (translate_x, translate_y)
         return points
-    def apply_single(self, point):
+
+    def apply_single(self, point, parallax=1):
         '''
         applies camera logic to single point
         '''
-        translate_point = (point[0] - self.viewport.x, point[1] - self.viewport.y)
-        return translate_point
+        translate_x = point[0] - self.viewport.x * parallax + self.viewport.width//2
+        translate_y = point[1] - self.viewport.y * parallax + self.viewport.height//2
+        return (translate_x, translate_y)
     
-    def apply_inverse(self, mouse):
+    def apply_inverse(self, mouse, parallax=1):
         '''
         applies camera logic to entities
         '''
-        position_x = mouse[0] + self.viewport.x
-        position_y = mouse[1] + self.viewport.y
-        return (position_x, position_y)
-    
+        translate_x = mouse[0] + self.viewport.x * parallax - self.viewport.width//2
+        translate_y = mouse[1] + self.viewport.y * parallax - self.viewport.height//2
+        return (translate_x, translate_y)
+
     def update(self, keys, dt):
         '''
         updates camera position
@@ -44,20 +48,20 @@ class Camera(object):
         if self.target == 0: #free movement
             '''Left and right movement'''
             if keys['right'] and not keys['left']: # Right movement
-                self.viewport.centerx += 1000 * dt
+                self.viewport.x += 1000 * dt
             elif keys['left'] and not keys['right']: # Left movement
-                self.viewport.centerx -= 1000 * dt
+                self.viewport.x -= 1000 * dt
             '''Up and down movement'''
             if keys['up'] and not keys['down']: # Up movement
-                self.viewport.centery -= 1000 * dt
+                self.viewport.y -= 1000 * dt
             elif keys['down'] and not keys['up']: # Down movement
-                self.viewport.centery += 1000 * dt
+                self.viewport.y += 1000 * dt
         elif self.target == 1: #fixed
-            self.viewport.centerx = 0
-            self.viewport.centery = 0
+            self.viewport.x = 0
+            self.viewport.y = 0
         else:
-            self.viewport.centerx = self.target.rect.centerx 
-            self.viewport.centery = self.target.rect.centery
+            self.viewport.x = self.target.rect.centerx
+            self.viewport.y = self.target.rect.centery
 
     def resize(self, screen):
         '''
