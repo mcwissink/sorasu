@@ -31,7 +31,7 @@ class Camera(object):
         '''
         translate_x = point[0] - self.viewport.x * parallax + self.viewport.width//2
         translate_y = point[1] - self.viewport.y * parallax + self.viewport.height//2
-        return (translate_x, translate_y)
+        return (int(translate_x), int(translate_y))
     
     def apply_inverse(self, mouse, parallax=1):
         '''
@@ -39,7 +39,7 @@ class Camera(object):
         '''
         translate_x = mouse[0] + self.viewport.x * parallax - self.viewport.width//2
         translate_y = mouse[1] + self.viewport.y * parallax - self.viewport.height//2
-        return (translate_x, translate_y)
+        return (int(translate_x), int(translate_y))
 
     def update(self, keys, dt):
         '''

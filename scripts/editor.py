@@ -81,7 +81,7 @@ class EditorState(GameState):
             elif self.editor_keys['shift']:
                 position = self.line_to[1]
             self.current_draw.rect.size = (position[0] - self.origin[0], position[1] - self.origin[1])
-            self.current_draw.offsets = self.calculate_offset(self.init_pos, position, self.current_draw.rect)
+            self.current_draw.offsets = self.calculate_offset(self.init_pos, position)
         #for deleting
         if self.tool == 1:
             if pygame.mouse.get_pressed()[0]:
@@ -232,7 +232,9 @@ class EditorState(GameState):
                             else:
                                 position = self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax)
                             self.current_draw.rect.normalize()
-                            self.current_draw.offsets = self.calculate_offset(self.origin, position, self.current_draw.rect)
+                            print('origin:', self.origin, 'position:', position)
+                            self.current_draw.offsets = self.calculate_offset(self.origin, position)
+                            print(self.current_draw.offsets)
                             #delete object if it is too small
                             
                             if not (self.current_draw.rect.width < 0.1 or self.current_draw.rect.height < 0.1):
@@ -288,26 +290,26 @@ class EditorState(GameState):
                         self.drag = False
                         self.selected = []          
 
-    def calculate_offset(self, origin, position, rect):
+    def calculate_offset(self, origin, position):
         '''
         calculates the necessary offsets for a shape
         '''
         #corrects offsets for negative rectangle values
         h = 1
         v = 1
-        if origin[0] == rect.topright[0]:
+        if origin[0] == self.current_draw.rect.topright[0]:
             h = -1
-        if origin[1] == rect.bottomleft[1]:
+        if origin[1] == self.current_draw.rect.bottomleft[1]:
             v = -1
         point_list = [(0,0), (0, v*(position[1]-origin[1])), (h*(position[0]-origin[0]), v*(position[1]-origin[1])), (h*(position[0]-origin[0]), 0)]
         if self.draw_shape == 0:
             return point_list
         elif self.draw_shape == 1:
-            if origin == rect.topleft:
+            if origin == self.current_draw.rect.topleft:
                 point_list.pop(1)
-            elif origin == rect.topright:
+            elif origin == self.current_draw.rect.topright:
                 point_list.pop(2)
-            elif origin == rect.bottomleft:
+            elif origin == self.current_draw.rect.bottomleft:
                 point_list.pop(0)
             else:
                 point_list.pop(3)
