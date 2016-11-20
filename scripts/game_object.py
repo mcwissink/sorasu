@@ -46,7 +46,7 @@ class GameObject(object):
 #includes any objects that are simply scenery
 class StaticObject(GameObject):
     #these are the parameters that you can edit in the editor
-    ATTRIBUTES = [{'name': 'Friction', 'init': 0.1, 'max': 5, 'min': 0, 'step': 0.1}]
+    ATTRIBUTES = [{'name': 'Friction', 'init': 0.95, 'max': 5, 'min': 0, 'step': 0.1}]
     def __init__(self, x, y, offsets, attributes):
         GameObject.__init__(self, x, y, offsets)
         self.friction = attributes[0]
@@ -62,12 +62,17 @@ class StaticObject(GameObject):
 class SceneryObject(GameObject):
     #these are the parameters that you can edit in the editor
     ATTRIBUTES = [{'name': 'Parallax', 'init': 1, 'max': 2, 'min': 0, 'step': 0.01}, #always make sure parallax is first
-                   {'name': 'Scale', 'init': 0.1, 'max': 5, 'min': 0, 'step': 0.1}]
+                  {'name': 'Scale', 'init': 0.1, 'max': 5, 'min': 0, 'step': 0.1}]
     def __init__(self, x, y, offsets, attributes):
         GameObject.__init__(self, x, y, offsets)
         self.parallax = attributes[0]
         self.scale = attributes[1]
         self.type = 'scenery'
+        if self.parallax <= 1:
+            color_adjust = 255-255*self.parallax
+        else:
+            color_adjust = 0
+        self.color = (color_adjust,color_adjust,color_adjust)
     def draw(self, screen, camera):
         #translates points and draws polygon
         translate_points = camera.apply(self.get_corners(), self.parallax)
@@ -100,12 +105,14 @@ class SceneryObject(GameObject):
 #includes any objects that collide with player
 class DynamicObject(GameObject):
     #these are the parameters that you can edit in the editor
-    ATTRIBUTES = [{'name': 'Mass', 'init': 10, 'max': 100, 'min': 1, 'step': 1}]
+    ATTRIBUTES = [{'name': 'Mass', 'init': 10, 'max': 100, 'min': 1, 'step': 1},
+                  {'name': 'Friction', 'init': 0.95, 'max': 5, 'min': 0, 'step': 0.1}]
     #create universal gravity constant
     GRAVITY = 100
     def __init__(self, x, y, offsets, attributes):
         GameObject.__init__(self, x, y, offsets)
         self.mass = attributes[0]
+        self.friction = attributes[1]
         self.spawn = (x, y)
         self.type = 'dynamic'
         self.dynamic = True 
@@ -113,7 +120,8 @@ class DynamicObject(GameObject):
         self.old_vel = pygame.math.Vector2(0,0)
         self.pos = pygame.math.Vector2(x,y)
         self.grav = self.GRAVITY*self.mass
-        self.fric = pygame.math.Vector2(0.01,0.01)
+        self.air_fric = 0.99
+        self.fric = pygame.math.Vector2(0,0)
         self.onground = False
         self.onwall = 0
     def update(self, dt, entities):
@@ -121,6 +129,10 @@ class DynamicObject(GameObject):
         self.onground = False
         self.onwall = 0
         #move the character
+        if abs(self.vel.x) > 0.01:
+            self.vel.x *= self.fric.x
+        else:
+            self.vel.x = 0
         self.vel.y += self.grav * dt
         self.pos += (self.old_vel + self.vel) * 0.5 * dt
         self.rect.x = self.pos.x
@@ -142,12 +154,15 @@ class DynamicObject(GameObject):
                             entity.vel += res_vec
                         if res_vec[1] > 0:
                             self.onground = True
+                            self.fric.x = entity.friction
                         elif res_vec[1] == 0 :
                             if res_vec[0] < 0:
                                 self.onwall = 1
                             else:
                                 self.onwall = -1
-    
+                else:
+                    self.fric.x = self.air_fric
+                    self.fric.y = self.air_fric
     def reset(self):
         '''resets the variable and sends it to the spawn point'''
         self.vel *= 0
@@ -160,5 +175,5 @@ class DynamicObject(GameObject):
         '''creates a dictionary of variables for saving specifically for Dynamic Objects'''
         return utilities.merge_dicts(GameObject.to_dictionary(self),
                 {
-                'attributes' : [self.mass]})
+                'attributes' : [self.mass, self.friction]})
     

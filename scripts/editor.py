@@ -22,7 +22,7 @@ class EditorState(GameState):
         '''  
         super(EditorState, self).__init__(file_name)
         if file_name is None:
-            self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], [10])
+            self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], [10, 0.9])
             self.gameEntities.append(self.player)
             self.camera = Camera(900, 600, 0)
             self.camera.resize(pygame.display.get_surface())
@@ -193,10 +193,6 @@ class EditorState(GameState):
                     self.draw_shape = 1
                 if event.key == pygame.K_8:
                     self.draw_shape = 0
-                if event.key == pygame.K_9:
-                    self.self.attr_selected += 0.1
-                if event.key == pygame.K_0:
-                    self.self.attr_selected += 0.1
                 if event.key == pygame.K_p:
                     self.test_level = not self.test_level
                     if self.camera.target == self.player:
@@ -232,9 +228,7 @@ class EditorState(GameState):
                             else:
                                 position = self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax)
                             self.current_draw.rect.normalize()
-                            print('origin:', self.origin, 'position:', position)
                             self.current_draw.offsets = self.calculate_offset(self.origin, position)
-                            print(self.current_draw.offsets)
                             #delete object if it is too small
                             
                             if not (self.current_draw.rect.width < 0.1 or self.current_draw.rect.height < 0.1):
