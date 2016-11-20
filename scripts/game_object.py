@@ -108,7 +108,7 @@ class DynamicObject(GameObject):
     ATTRIBUTES = [{'name': 'Mass', 'init': 10, 'max': 100, 'min': 1, 'step': 1},
                   {'name': 'Friction', 'init': 0.95, 'max': 5, 'min': 0, 'step': 0.1}]
     #create universal gravity constant
-    GRAVITY = 100
+    GRAVITY = 2000
     def __init__(self, x, y, offsets, attributes):
         GameObject.__init__(self, x, y, offsets)
         self.mass = attributes[0]
@@ -119,8 +119,8 @@ class DynamicObject(GameObject):
         self.vel = pygame.math.Vector2(0,0)
         self.old_vel = pygame.math.Vector2(0,0)
         self.pos = pygame.math.Vector2(x,y)
-        self.grav = self.GRAVITY*self.mass
-        self.air_fric = 0.99
+        self.grav = self.GRAVITY
+        self.air_fric = 0.999
         self.fric = pygame.math.Vector2(0,0)
         self.onground = False
         self.onwall = 0
