@@ -13,6 +13,7 @@ import utilities
 class GameObject(object):
     #these are the parameters that you can edit in the editor
     def __init__(self, x, y, offsets):
+        '''base init for all entities'''
         self.type = 'scenery'
         self.color = (0,0,0)
         self.dynamic = False
@@ -23,12 +24,15 @@ class GameObject(object):
         y_offsets = [offset[1] for offset in offsets]
         self.rect = pygame.Rect(x ,y ,max(x_offsets), max(y_offsets))
     def update(self, dt):
+        '''base update - other objects expand on this'''
         pass
     def draw(self, screen, camera):
+        '''basic draw function'''
         #translates points and draws polygon
         translate_points = camera.apply(self.get_corners())
         pygame.draw.polygon(screen, self.color, translate_points, 0)
     def debug_draw(self, screen, camera):
+        '''debug draw for eraser tool'''
         #translates points and draws rect
         position = camera.apply_single((self.rect.x, self.rect.y))
         pygame.draw.rect(screen, (255,0,0), (position[0], position[1], self.rect.width, self.rect.height), 2)
@@ -48,6 +52,7 @@ class StaticObject(GameObject):
     #these are the parameters that you can edit in the editor
     ATTRIBUTES = [{'name': 'Friction', 'init': 0.95, 'max': 5, 'min': 0, 'step': 0.1}]
     def __init__(self, x, y, offsets, attributes):
+        '''Static Objects are used for platforms - they don't move'''
         GameObject.__init__(self, x, y, offsets)
         self.friction = attributes[0]
         self.type = 'static'
@@ -64,6 +69,7 @@ class SceneryObject(GameObject):
     ATTRIBUTES = [{'name': 'Parallax', 'init': 1, 'max': 2, 'min': 0, 'step': 0.01}, #always make sure parallax is first
                   {'name': 'Scale', 'init': 0.1, 'max': 5, 'min': 0, 'step': 0.1}]
     def __init__(self, x, y, offsets, attributes):
+        '''scenery objects are for effects and stuff'''
         GameObject.__init__(self, x, y, offsets)
         self.parallax = attributes[0]
         self.scale = attributes[1]
@@ -74,11 +80,13 @@ class SceneryObject(GameObject):
             color_adjust = 0
         self.color = (color_adjust,color_adjust,color_adjust)
     def draw(self, screen, camera):
+        '''draw function with parallax'''
         #translates points and draws polygon
         translate_points = camera.apply(self.get_corners(), self.parallax)
         pygame.draw.polygon(screen, self.color, translate_points, 0)
     
     def debug_draw(self, screen, camera):
+        '''debug draw with parallax'''
         #translates points and draws rect
         position = camera.apply_single((self.rect.x, self.rect.y), self.parallax)
         pygame.draw.rect(screen, (255,0,0), (position[0], position[1], self.rect.width, self.rect.height), 2)
@@ -90,11 +98,11 @@ class SceneryObject(GameObject):
         http://www.pygame.org/docs/ref/surface.html for the different blend modes
         Thanks to Claudio Canepa <ccanepacc@gmail.com>.
         """
-     
         blend = pygame.Surface(surface.get_size(), pygame.SRCALPHA, 32)
         blend.fill((red,green,blue,alpha))
         blend.blit(surface, (0,0), surface.get_rect(), mode)
         return blend
+    
     def to_dictionary(self):
         '''creates a dictionary of variables for saving specifically for Static Objects''' 
         #http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
@@ -110,6 +118,7 @@ class DynamicObject(GameObject):
     #create universal gravity constant
     GRAVITY = 2000
     def __init__(self, x, y, offsets, attributes):
+        '''Dynamic Objects move and collide - parent of the player'''
         GameObject.__init__(self, x, y, offsets)
         self.mass = attributes[0]
         self.friction = attributes[1]
@@ -125,11 +134,17 @@ class DynamicObject(GameObject):
         self.onground = False
         self.onwall = 0
     def update(self, dt, entities):
+        '''updates and applies physics'''
+        ''''
+        
+        expand the rectangle on dynamic objects so it can used as a flag for on wall and onground
+        
+        '''
         #reset variables
         self.onground = False
         self.onwall = 0
         #move the character
-        if abs(self.vel.x) > 0.01:
+        if abs(self.vel.x) > 0.1:
             self.vel.x *= self.fric.x
         else:
             self.vel.x = 0
@@ -151,7 +166,7 @@ class DynamicObject(GameObject):
                         res_vec = pygame.math.Vector2(physics.normalize(vec)) * physics.dot_product(physics.normalize(vec), self.vel)
                         self.vel -= res_vec
                         if entity.dynamic:
-                            entity.vel += res_vec
+                            entity.vel += (res_vec+self.vel)/2
                         if res_vec[1] > 0:
                             self.onground = True
                             self.fric.x = entity.friction

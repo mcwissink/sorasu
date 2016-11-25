@@ -40,7 +40,7 @@ class Player(DynamicObject):
                 self.vel.y = -1000
                 self.vel.x += 1000 * self.onwall
         elif keys['down'] and not keys['up']: # Fall faster when user is pressing down
-            self.vel.y += 10
+            self.vel.y += 3000 *dt
         #Store past key presses
         self.past_up = True if (keys['up']) else False
         self.past_down = True if (keys['down']) else False

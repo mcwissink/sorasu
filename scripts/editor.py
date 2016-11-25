@@ -17,11 +17,9 @@ from player import Player
 
 class EditorState(GameState):
     def __init__(self, file_name=None):
-        '''
-        initiate the editor
-        '''  
-        super(EditorState, self).__init__(file_name)
-        if file_name is None:
+        '''initiate the editor'''  
+        super(EditorState, self).__init__(file_name) #initialize the game
+        if file_name is None: #load the base for a level
             self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], [10, 0.9])
             self.gameEntities.append(self.player)
             self.camera = Camera(900, 600, 0)
@@ -34,12 +32,12 @@ class EditorState(GameState):
         #set up editor specific values and draws and buttons
         button.buttons_init(self)
         self.attr_buttons = [] #used to store specific buttons
-        self.attr_selected = None
+        self.attr_selected = None #used for changing values of objects
         self.editor_keys = {'up': False, 'down': False, 'left': False, 'right': False, 'ctrl': False, 'shift': False} #dictionary for key presses
         self.test_level = False
         #create the menu
         self.initialize_menu()
-        #variables for all the editing
+        #variables for all the editing - used later in the code
         self.parallax = 1
         self.snap_to = (0, 0)
         self.line_to = [(0, 0), (0, 0)]
@@ -55,14 +53,13 @@ class EditorState(GameState):
         self.drag = False #used for selector
         
     def update(self, dt):
-        '''
-        loop through objects and run logic
-        '''
-        if self.draw_type == game_object.SceneryObject:
-            self.parallax = self.attr_buttons[0].value
+        '''run logic of the editor - and the game if it is active'''
+        if self.draw_type == game_object.SceneryObject: #maybe try to remove this
+            self.parallax = self.attr_buttons[0].value #makes handling parallax a little easier
         #update the editor buttons
         button.buttons_update(self, self.buttons)
         #update the current snap function visuals
+        #used for snapping to objects
         position = self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax)
         if self.editor_keys['ctrl']:
             self.snap_to = self.snap_to_corner(position, self.gameEntities)
@@ -73,13 +70,14 @@ class EditorState(GameState):
         else:
             self.line_to = [(0, 0), (0, 0)]
         #if drawing something
-        if self.continue_draw:
+        if self.continue_draw: #update the draw
             #snap to corner
             if self.editor_keys['ctrl']:
                 position = self.snap_to
             #snap to plane
             elif self.editor_keys['shift']:
                 position = self.line_to[1]
+            #update the rectangle collider and offsets 
             self.current_draw.rect.size = (position[0] - self.origin[0], position[1] - self.origin[1])
             self.current_draw.offsets = self.calculate_offset(self.init_pos, position)
         #for deleting
@@ -227,6 +225,8 @@ class EditorState(GameState):
                                 position = self.line_to[1]
                             else:
                                 position = self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax)
+                            #apply final updates to the shape
+                            self.current_draw.rect.size = (position[0] - self.origin[0], position[1] - self.origin[1])
                             self.current_draw.rect.normalize()
                             self.current_draw.offsets = self.calculate_offset(self.origin, position)
                             #delete object if it is too small
@@ -237,7 +237,7 @@ class EditorState(GameState):
                             self.continue_draw = False
                     if self.tool == 2:
                         for entity in self.selected:
-                            #initiliaze the drag
+                            #initialize the drag
                             if entity.rect.collidepoint(self.init_pos):
                                 self.drag = True
                         if not self.drag:
@@ -384,8 +384,8 @@ class EditorState(GameState):
                 try:
                     super(EditorState, self).load_game(self.textbox.text)
                     self.test_level = False
-                    self.camera.viewport.centerx = self.player.rect.centerx 
-                    self.camera.viewport.centery = self.player.rect.centery
+                    self.camera.viewport.x = self.player.rect.centerx 
+                    self.camera.viewport.y = self.player.rect.centery
                     self.camera.target = 0
                 except Exception as e:
                     print(e)
@@ -402,11 +402,24 @@ class EditorState(GameState):
             self.test_level = False
             #reset the camera to the player
             self.camera.target = 0
-            self.camera.viewport.centerx = self.player.rect.centerx 
-            self.camera.viewport.centery = self.player.rect.centery
+            self.camera.viewport.x = self.player.rect.centerx 
+            self.camera.viewport.y = self.player.rect.centery
         self.resetButton.onClick = onResetClick
         self.resetButton.realign(self.camera)
         self.buttons.append(self.resetButton)
+        #tools button
+        self.toolsButton = button.Button(15, self.resetButton.rect.bottom+20, self.button_font_big, (255,255,255), 100, 'D  E  S', (0,0))
+        def onToolsClick():
+            '''selects the tool'''
+            if pygame.mouse.get_pos()[0] < self.toolsButton.rect.width/3:
+                self.tool = 0
+            elif pygame.mouse.get_pos()[0] < self.toolsButton.rect.width*(2/3):
+                self.tool = 1
+            else:
+                self.tool = 2
+        self.toolsButton.onClick = onToolsClick
+        self.toolsButton.realign(self.camera)
+        self.buttons.append(self.toolsButton)
         #sets draw type to static
         self.staticButton = button.Button(15, -100, self.button_font_big, (255,255,255), 100, 'Static', (0,1))
         def onStaticClick():
