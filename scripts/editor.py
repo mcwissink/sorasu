@@ -62,11 +62,11 @@ class EditorState(GameState):
         #used for snapping to objects
         position = self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax)
         if self.editor_keys['ctrl']:
-            self.snap_to = self.snap_to_corner(position, self.gameEntities)
+            self.snap_to = self.snap_to_corner(position, self.get_layer())
         else:
             self.snap_to = (0, 0)
         if self.editor_keys['shift']:
-            self.line_to = self.snap_to_plane(position, self.gameEntities)
+            self.line_to = self.snap_to_plane(position, self.get_layer())
         else:
             self.line_to = [(0, 0), (0, 0)]
         #if drawing something
@@ -83,7 +83,7 @@ class EditorState(GameState):
         #for deleting
         if self.tool == 1:
             if pygame.mouse.get_pressed()[0]:
-                self.delete_object(position, self.gameEntities)
+                self.delete_object(position, self.get_layer())
         #for draggin
         if self.tool == 2:
             if not self.drag:
@@ -113,17 +113,17 @@ class EditorState(GameState):
         screen.fill(pygame.Color(255, 255, 255))
         for entity in self.backGroundEntities:
             entity.draw(screen, self.camera)
-            if self.tool == 1:
+            if self.tool == 1 and self.get_layer() == self.backGroundEntities:
                 entity.debug_draw(screen, self.camera)
         for entity in self.gameEntities:
             entity.draw(screen, self.camera)
-            if self.tool == 1:
+            if self.tool == 1 and self.get_layer() == self.gameEntities:
                 entity.debug_draw(screen, self.camera)
             elif self.tool == 2 and entity in self.selected:
                 entity.debug_draw(screen, self.camera)
         for entity in self.foreGroundEntities:
             entity.draw(screen, self.camera)
-            if self.tool == 1:
+            if self.tool == 1 and self.get_layer() == self.foreGroundEntities:
                 entity.debug_draw(screen, self.camera)
             elif self.tool == 2 and entity in self.selected:
                 entity.debug_draw(screen, self.camera)
@@ -207,9 +207,9 @@ class EditorState(GameState):
                     self.init_pos = self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax)
                     if self.tool == 0:
                         if self.editor_keys['ctrl']:
-                            self.init_pos = self.snap_to_corner(self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax), self.gameEntities)
+                            self.init_pos = self.snap_to_corner(self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax), self.get_layer())
                         elif self.editor_keys['shift']:
-                            self.init_pos = self.snap_to_plane(self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax), self.gameEntities)[1] 
+                            self.init_pos = self.snap_to_plane(self.camera.apply_inverse(pygame.mouse.get_pos(), self.parallax), self.get_layer())[1] 
                         if not self.continue_draw:
                             #setup a new draw
                             self.origin = self.init_pos
