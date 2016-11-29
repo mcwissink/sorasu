@@ -50,7 +50,7 @@ class GameObject(object):
 #includes any objects that are simply scenery
 class StaticObject(GameObject):
     #these are the parameters that you can edit in the editor
-    ATTRIBUTES = [{'name': 'Friction', 'init': 0.95, 'max': 5, 'min': 0, 'step': 0.1}]
+    ATTRIBUTES = [{'name': 'Friction', 'init': 1, 'max': 2, 'min': 0, 'step': 0.1}]
     def __init__(self, x, y, offsets, attributes):
         '''Static Objects are used for platforms - they don't move'''
         GameObject.__init__(self, x, y, offsets)
@@ -116,48 +116,49 @@ class SceneryObject(GameObject):
 class DynamicObject(GameObject):
     #these are the parameters that you can edit in the editor
     ATTRIBUTES = [{'name': 'Mass', 'init': 10, 'max': 100, 'min': 1, 'step': 1},
-                  {'name': 'Friction', 'init': 0.95, 'max': 5, 'min': 0, 'step': 0.1}]
+                  {'name': 'Friction', 'init': 1, 'max': 2, 'min': 0, 'step': 0.1}]
     #create universal gravity constant
     GRAVITY = 2000
     def __init__(self, x, y, offsets, attributes):
         '''Dynamic Objects move and collide - parent of the player'''
         GameObject.__init__(self, x, y, offsets)
+        #set variables
         self.mass = attributes[0]
         self.friction = attributes[1]
         self.spawn = (x, y)
         self.type = 'dynamic'
         self.dynamic = True 
         self.vel = pygame.math.Vector2(0,0)
-        self.old_vel = pygame.math.Vector2(0,0)
         self.pos = pygame.math.Vector2(x,y)
         self.grav = self.GRAVITY
-        self.air_fric = 0.999
-        self.fric = pygame.math.Vector2(0,0)
+        self.air_fric = 0.5
+        self.fric = 0
+        self.collision = False #flag for collisions
         self.onground = False
         self.onwall = 0
+        #inflate the rect to get accurate reading of onground and onwall
+        self.rect.inflate_ip(2,2)
+        #update the offsets so they are centered
+        for i in range(len(self.offsets)):
+            self.offsets[i] = (offsets[i][0]+1, offsets[i][1]+1)
+        
     def update(self, dt, entities):
         '''updates and applies physics'''
-        ''''
-        
-        expand the rectangle on dynamic objects so it can used as a flag for on wall and onground
-        
-        '''
-        #reset variables
-        self.onground = False
-        self.onwall = 0
         #move the character
+        self.pos += self.vel * 0.5 * dt
         if abs(self.vel.x) > 0.1:
-            self.vel.x *= self.fric.x
+            self.vel.x -= math.copysign(1, self.vel.x) * self.fric
         else:
             self.vel.x = 0
         self.vel.y += self.grav * dt
-        self.pos += (self.old_vel + self.vel) * 0.5 * dt
         self.rect.x = self.pos.x
         self.rect.y = self.pos.y
         #physics check
+        self.collision = False
         for entity in entities:
             if entity != self:
                 if self.rect.colliderect(entity):
+                    self.collision = True
                     vec = physics.collide(self, entity)
                     if vec:
                         self.pos -= vec
@@ -171,15 +172,17 @@ class DynamicObject(GameObject):
                             entity.vel += (res_vec+self.vel)/2
                         if res_vec[1] > 0:
                             self.onground = True
-                            self.fric.x = entity.friction
+                            self.fric = entity.friction
                         elif res_vec[1] == 0 :
                             if res_vec[0] < 0:
                                 self.onwall = 1
                             else:
                                 self.onwall = -1
-                else:
-                    self.fric.x = self.air_fric
-                    self.fric.y = self.air_fric
+        if not self.collision:
+            #reset variables if there is no collision 
+            self.fric = self.air_fric
+            self.onground = False
+            self.onwall = 0
     def reset(self):
         '''resets the variable and sends it to the spawn point'''
         self.vel *= 0

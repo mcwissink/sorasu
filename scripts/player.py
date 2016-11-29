@@ -14,7 +14,7 @@ class Player(DynamicObject):
     def __init__(self, x, y, offsets, attributes):
         DynamicObject.__init__(self, x, y, offsets, attributes)
         self.type = 'player'
-        self.color = (255,0,0)
+        self.color = (100,100,100)
         self.max_vel = 3000
         self.accel = 2000
         self.past_up = self.past_down = self.past_left = self.past_right = True # Past key presses
@@ -32,8 +32,8 @@ class Player(DynamicObject):
             if abs(self.vel.x) < self.max_vel:
                 self.vel.x -= abs(self.accel+self.vel.x) * dt
         '''Up and down movement'''
-        if keys['up'] and not keys['down']: # Jump, wall jump
-            #if not self.past_up: #make sure the key is pressed and not held  
+        if keys['up'] and not keys['down'] and not self.past_up: # Jump, wall jump
+            #if not self.past_up: #make sure the key is pressed and not held 
             if self.onground:
                 self.vel.y -= 1000
             if self.onwall:

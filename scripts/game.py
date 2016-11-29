@@ -40,7 +40,7 @@ class GameState():
         for entity in self.backGroundEntities:
             entity.update(dt)
         for entity in self.gameEntities:
-            if (entity.dynamic):
+            if entity.dynamic:
                 entity.update(dt, self.gameEntities)
             else:
                 entity.update(dt)
