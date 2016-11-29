@@ -38,7 +38,7 @@ class EditorState(GameState):
         #create the menu
         self.initialize_menu()
         #variables for all the editing - used later in the code
-        self.parallax = 1
+        self.parallax = (1,1)
         self.snap_to = (0, 0)
         self.line_to = [(0, 0), (0, 0)]
         self.init_pos = (0, 0)
@@ -55,7 +55,7 @@ class EditorState(GameState):
     def update(self, dt):
         '''run logic of the editor - and the game if it is active'''
         if self.draw_type == game_object.SceneryObject: #maybe try to remove this
-            self.parallax = self.attr_buttons[0].value #makes handling parallax a little easier
+            self.parallax = (self.attr_buttons[0].value, self.attr_buttons[1].value) #makes handling parallax a little easier
         #update the editor buttons
         button.buttons_update(self, self.buttons)
         #update the current snap function visuals
@@ -343,7 +343,7 @@ class EditorState(GameState):
     def get_layer(self):
         '''gets the layer for drawing'''
         if self.draw_type == game_object.SceneryObject:
-            if self.current_draw.parallax > 1:
+            if self.attr_buttons[0].value > 1:
                 return self.foreGroundEntities
             else:
                 return self.backGroundEntities
@@ -425,7 +425,7 @@ class EditorState(GameState):
         def onStaticClick():
             self.draw_type = game_object.StaticObject
             self.entity_variables(100, 300, self.draw_type)
-            self.parallax = 1
+            self.parallax = (1,1)
         self.staticButton.onClick = onStaticClick
         self.staticButton.realign(self.camera)
         self.buttons.append(self.staticButton)
@@ -434,7 +434,7 @@ class EditorState(GameState):
         def onDynamicClick():
             self.draw_type = game_object.DynamicObject
             self.entity_variables(100, 300, self.draw_type)
-            self.parallax = 1
+            self.parallax = (1,1)
         self.dynamicButton.onClick = onDynamicClick
         self.dynamicButton.realign(self.camera)
         self.buttons.append(self.dynamicButton)

@@ -66,29 +66,31 @@ class StaticObject(GameObject):
 #includes any objects that are simply scenery
 class SceneryObject(GameObject):
     #these are the parameters that you can edit in the editor
-    ATTRIBUTES = [{'name': 'Parallax', 'init': 1, 'max': 2, 'min': 0, 'step': 0.01}, #always make sure parallax is first
+    ATTRIBUTES = [{'name': 'Parallax X', 'init': 1, 'max': 2, 'min': 0, 'step': 0.01}, #always make sure parallax is first
+                  {'name': 'Parallax Y', 'init': 1, 'max': 2, 'min': 0, 'step': 0.01}, #always make sure parallax is first
                   {'name': 'Scale', 'init': 0.1, 'max': 5, 'min': 0, 'step': 0.1}]
     def __init__(self, x, y, offsets, attributes):
         '''scenery objects are for effects and stuff'''
         GameObject.__init__(self, x, y, offsets)
-        self.parallax = attributes[0]
-        self.scale = attributes[1]
+        self.parallax_x = attributes[0]
+        self.parallax_y  = attributes[1]
+        self.scale = attributes[2]
         self.type = 'scenery'
-        if self.parallax <= 1:
-            color_adjust = 255-255*self.parallax
+        if self.parallax_x <= 1:
+            color_adjust = 255-255*self.parallax_x
         else:
             color_adjust = 0
         self.color = (color_adjust,color_adjust,color_adjust)
     def draw(self, screen, camera):
         '''draw function with parallax'''
         #translates points and draws polygon
-        translate_points = camera.apply(self.get_corners(), self.parallax)
+        translate_points = camera.apply(self.get_corners(), (self.parallax_x, self.parallax_y))
         pygame.draw.polygon(screen, self.color, translate_points, 0)
     
     def debug_draw(self, screen, camera):
         '''debug draw with parallax'''
         #translates points and draws rect
-        position = camera.apply_single((self.rect.x, self.rect.y), self.parallax)
+        position = camera.apply_single((self.rect.x, self.rect.y), (self.parallax_x, self.parallax_y))
         pygame.draw.rect(screen, (255,0,0), (position[0], position[1], self.rect.width, self.rect.height), 2)
         
     def get_alpha_surface(self, surface, alpha=120, red=255, green=255, blue=255, mode=pygame.BLEND_RGBA_MULT):
@@ -108,7 +110,7 @@ class SceneryObject(GameObject):
         #http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
         return utilities.merge_dicts(GameObject.to_dictionary(self),
                 {
-                'attributes' : [self.parallax, self.scale]})
+                'attributes' : [self.parallax_x, self.parallax_y, self.scale]})
 
 #includes any objects that collide with player
 class DynamicObject(GameObject):

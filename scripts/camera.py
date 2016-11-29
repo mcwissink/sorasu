@@ -15,30 +15,30 @@ class Camera(object):
             self.target = target
         except:
             self.target = 0
-    def apply(self, points, parallax=1):
+    def apply(self, points, parallax=(1,1)):
         '''
         position relative to parallax
         '''
         for i in range(len(points)):
-            translate_x = points[i][0] - self.viewport.x * parallax + self.viewport.width//2
-            translate_y = points[i][1] - self.viewport.y * parallax + self.viewport.height//2
+            translate_x = points[i][0] - self.viewport.x * parallax[0] + self.viewport.width//2
+            translate_y = points[i][1] - self.viewport.y * parallax[1] + self.viewport.height//2
             points[i] = (translate_x, translate_y)
         return points
 
-    def apply_single(self, point, parallax=1):
+    def apply_single(self, point, parallax=(1,1)):
         '''
         applies camera logic to single point
         '''
-        translate_x = point[0] - self.viewport.x * parallax + self.viewport.width//2
-        translate_y = point[1] - self.viewport.y * parallax + self.viewport.height//2
+        translate_x = point[0] - self.viewport.x * parallax[0] + self.viewport.width//2
+        translate_y = point[1] - self.viewport.y * parallax[1] + self.viewport.height//2
         return (int(translate_x), int(translate_y))
     
-    def apply_inverse(self, mouse, parallax=1):
+    def apply_inverse(self, mouse, parallax=(1,1)):
         '''
         applies camera logic to entities
         '''
-        translate_x = mouse[0] + self.viewport.x * parallax - self.viewport.width//2
-        translate_y = mouse[1] + self.viewport.y * parallax - self.viewport.height//2
+        translate_x = mouse[0] + self.viewport.x * parallax[0] - self.viewport.width//2
+        translate_y = mouse[1] + self.viewport.y * parallax[1] - self.viewport.height//2
         return (int(translate_x), int(translate_y))
 
     def update(self, keys, dt):
