@@ -92,3 +92,25 @@ def normalize(vec):
     x, y = vec
     magnitude = 1/math.hypot(x, y)
     return magnitude*x, magnitude*y
+
+def resolve_collision(entity1, entity2):
+    '''resolve collision between two objects
+    https://gamedevelopment.tutsplus.com/tutorials/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331'''
+    res_vec = entity2.vel - entity1.vel
+    normal = pygame.math.Vector2(normalize(res_vec))
+    #calculate relative velocity in terms of the normal direction
+    vel_normal = dot_product(res_vec, normal)
+    #do not resolve if velocities are separating
+    if vel_normal > 0:
+        '''figure this out'''
+        print(vel_normal)
+        print(normal)
+    #calculate restitution
+    e = min(entity1.bounce, entity2.bounce)
+    #calculate impulse scalar
+    j = -(1 + e) * vel_normal
+    j /= entity1.inv_mass + entity2.inv_mass
+    #apply impulse
+    impulse = j * normal
+    entity1.vel -= entity1.inv_mass * impulse
+    entity2.vel += entity2.inv_mass * impulse

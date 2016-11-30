@@ -21,6 +21,7 @@ class EditorState(GameState):
         super(EditorState, self).__init__(file_name) #initialize the game
         if file_name is None: #load the base for a level
             self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], [10, 0.9])
+            self.player.adjust_collision()
             self.gameEntities.append(self.player)
             self.camera = Camera(900, 600, 0)
             self.camera.resize(pygame.display.get_surface())
@@ -230,9 +231,9 @@ class EditorState(GameState):
                             self.current_draw.rect.normalize()
                             self.current_draw.offsets = self.calculate_offset(self.origin, position)
                             #delete object if it is too small
-                            
                             if not (self.current_draw.rect.width < 0.1 or self.current_draw.rect.height < 0.1):
                                 self.get_layer().append(self.current_draw)
+                                
                             self.current_draw = None
                             self.continue_draw = False
                     if self.tool == 2:

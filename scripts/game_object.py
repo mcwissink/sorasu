@@ -124,6 +124,7 @@ class DynamicObject(GameObject):
         GameObject.__init__(self, x, y, offsets)
         #set variables
         self.mass = attributes[0]
+        self.inv_mass = 1/self.mass
         self.friction = attributes[1]
         self.spawn = (x, y)
         self.type = 'dynamic'
@@ -131,17 +132,12 @@ class DynamicObject(GameObject):
         self.vel = pygame.math.Vector2(0,0)
         self.pos = pygame.math.Vector2(x,y)
         self.grav = self.GRAVITY
+        self.bounce = 0.5
         self.air_fric = 0.5
         self.fric = 0
         self.collision = False #flag for collisions
         self.onground = False
         self.onwall = 0
-        #inflate the rect to get accurate reading of onground and onwall
-        self.rect.inflate_ip(2,2)
-        #update the offsets so they are centered
-        for i in range(len(self.offsets)):
-            self.offsets[i] = (offsets[i][0]+1, offsets[i][1]+1)
-        
     def update(self, dt, entities):
         '''updates and applies physics'''
         #move the character
@@ -164,16 +160,16 @@ class DynamicObject(GameObject):
                         self.pos -= vec
                         self.rect.x = self.pos.x
                         self.rect.y = self.pos.y
-                        
                         #correct the velocity based on the vec return --- Nathan Brink
                         res_vec = pygame.math.Vector2(physics.normalize(vec)) * physics.dot_product(physics.normalize(vec), self.vel)
-                        self.vel -= res_vec
                         if entity.dynamic:
-                            entity.vel += (res_vec+self.vel)/2
+                            physics.resolve_collision(self, entity)
+                        else:
+                            self.vel -= res_vec
                         if res_vec[1] > 0:
                             self.onground = True
                             self.fric = entity.friction
-                        elif res_vec[1] == 0 :
+                        else:
                             if res_vec[0] < 0:
                                 self.onwall = 1
                             else:
@@ -190,7 +186,15 @@ class DynamicObject(GameObject):
         self.rect.y = self.spawn[1]
         self.pos[0] = self.rect.x
         self.pos[1] = self.rect.y
-
+    
+    def adjust_collision(self):
+        ''''inflate the rect for reading of onground and onwall'''
+        self.rect.width += 2
+        self.rect.height += 2
+        #update the offsets so they are centered
+        for i in range(len(self.offsets)):
+            self.offsets[i] = (self.offsets[i][0]+1, self.offsets[i][1]+1)
+        
     def to_dictionary(self):
         '''creates a dictionary of variables for saving specifically for Dynamic Objects'''
         return utilities.merge_dicts(GameObject.to_dictionary(self),
