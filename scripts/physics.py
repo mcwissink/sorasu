@@ -43,6 +43,24 @@ def collide(entity1, entity2):
                 current_axis = axis
     mtv = (current_axis[0]*overlap, current_axis[1]*overlap)
     return mtv
+
+def collide_test(entity1, entity2):
+    '''
+    check for collisions between entities with the dynamics test offsets
+    only for checking
+    '''
+    #obtain axis from entity2 assuming entity1 is the player and won't change its rotation
+    axis_list = get_axis(entity2.get_corners())
+    for axis in axis_list:
+        # Project the shapes onto the axis
+        entity1_projection = project(axis, entity1.get_corners_test())
+        entity2_projection = project(axis, entity2.get_corners())
+        #test if the projections overlap
+        for projection in [(entity1_projection[1], entity2_projection[0], 1), (entity2_projection[1], entity1_projection[0], -1)]:
+            p1, p2, sign = projection
+            if not p1 > p2:
+                return False
+    return True
 def get_axis(corners):
     '''
     gets all the axis necessary for collision
@@ -101,10 +119,8 @@ def resolve_collision(entity1, entity2):
     #calculate relative velocity in terms of the normal direction
     vel_normal = dot_product(res_vec, normal)
     #do not resolve if velocities are separating
-    if vel_normal > 0:
-        '''figure this out'''
-        print(vel_normal)
-        print(normal)
+    if normal[1] < -0.8 and normal[1] > -1:
+        return False
     #calculate restitution
     e = min(entity1.bounce, entity2.bounce)
     #calculate impulse scalar
@@ -114,3 +130,4 @@ def resolve_collision(entity1, entity2):
     impulse = j * normal
     entity1.vel -= entity1.inv_mass * impulse
     entity2.vel += entity2.inv_mass * impulse
+    return True

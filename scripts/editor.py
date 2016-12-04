@@ -8,6 +8,7 @@ import pygame, sys
 import math, json
 import random
 import game_object
+import enemy
 import utilities
 import button
 import textbox
@@ -214,7 +215,11 @@ class EditorState(GameState):
                         if not self.continue_draw:
                             #setup a new draw
                             self.origin = self.init_pos
-                            self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons])
+                            if self.draw_type == enemy.Enemy:
+                                #special case for enemy
+                                self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons], self.player)
+                            else:
+                                self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons])
                             self.continue_draw = True
                         else:
                             #finish draw
@@ -230,8 +235,11 @@ class EditorState(GameState):
                             self.current_draw.rect.size = (position[0] - self.origin[0], position[1] - self.origin[1])
                             self.current_draw.rect.normalize()
                             self.current_draw.offsets = self.calculate_offset(self.origin, position)
+                            #adjust collision box if object is dynamic
+                            if self.current_draw.dynamic:
+                                self.current_draw.adjust_collision()
                             #delete object if it is too small
-                            if not (self.current_draw.rect.width < 0.1 or self.current_draw.rect.height < 0.1):
+                            if not (self.current_draw.rect.width < 0.2 or self.current_draw.rect.height < 0.2):
                                 self.get_layer().append(self.current_draw)
                                 
                             self.current_draw = None
@@ -447,6 +455,14 @@ class EditorState(GameState):
         self.sceneryButton.onClick = onSceneryClick
         self.sceneryButton.realign(self.camera)
         self.buttons.append(self.sceneryButton)
+        #sets draw type to Scenery
+        self.enemyButton = button.Button(15, -250, self.button_font_big, (255,255,255), 100, 'Enemy', (0,1))
+        def onEnemyClick():
+            self.draw_type = enemy.Enemy
+            self.entity_variables(100, 300, self.draw_type)
+        self.enemyButton.onClick = onEnemyClick
+        self.enemyButton.realign(self.camera)
+        self.buttons.append(self.enemyButton)
         #load the variables that can be edited
         self.entity_variables(100, 300, game_object.StaticObject) #this would normally pass in self.draw_type
         

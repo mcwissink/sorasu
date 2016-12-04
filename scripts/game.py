@@ -12,6 +12,7 @@ import button
 import utilities
 from camera import Camera
 from player import Player
+from enemy import Enemy
 
 class GameState():
     def __init__(self, file_name=None):
@@ -60,8 +61,6 @@ class GameState():
             entity.draw(screen, self.camera)
         for entity in self.foreGroundEntities:
             entity.draw(screen, self.camera)
-        for entity in self.buttons:
-            entity.draw(screen)
 
     def eventHandler(self, event):
         '''
@@ -105,6 +104,7 @@ class GameState():
         '''
         return {
                 'player' : self.player.to_dictionary(),
+                'enemies' : [entity.to_dictionary() for entity in self.gameEntities if entity.type == 'enemy'],
                 'dynamicEntities' : [entity.to_dictionary() for entity in self.gameEntities if entity.type == 'dynamic'],
                 'staticEntities' : [entity.to_dictionary() for entity in self.gameEntities if entity.type == 'static'],
                 'backGroundEntities' : [scenery.to_dictionary() for scenery in self.backGroundEntities],
@@ -115,9 +115,10 @@ class GameState():
         load level from a dictionary
         '''
         self.player = Player(**{key: value for (key, value) in dictionary['player'].items()})
+        enemies = [game_object.Enemy(**{key: value for (key, value) in i.items()}) for i in dictionary['enemy']]
         dynamic = [game_object.DynamicObject(**{key: value for (key, value) in i.items()}) for i in dictionary['dynamicEntities']]
         static = [game_object.StaticObject(**{key: value for (key, value) in i.items()}) for i in dictionary['staticEntities']]
-        self.gameEntities = dynamic + static
+        self.gameEntities = dynamic + static + enemies
         self.gameEntities.append(self.player)
         self.backGroundEntities = [game_object.SceneryObject(**{key: value for (key, value) in i.items()}) for i in dictionary['backGroundEntities']]
         self.foreGroundEntities = [game_object.SceneryObject(**{key: value for (key, value) in i.items()}) for i in dictionary['foreGroundEntities']]

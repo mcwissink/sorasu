@@ -14,7 +14,7 @@ class Player(DynamicObject):
     def __init__(self, x, y, offsets, attributes):
         DynamicObject.__init__(self, x, y, offsets, attributes)
         self.type = 'player'
-        self.color = (100,100,100)
+        self.color = (255,0,0)
         self.max_vel = 3000
         self.accel = 2000
         self.past_up = self.past_down = self.past_left = self.past_right = True # Past key presses
