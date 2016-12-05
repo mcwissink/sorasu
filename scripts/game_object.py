@@ -60,8 +60,7 @@ class StaticObject(GameObject):
         '''creates a dictionary of variables for saving specifically for Static Objects''' 
         #http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
         return utilities.merge_dicts(GameObject.to_dictionary(self),
-                {
-                'attributes' : [self.friction]})
+                {'attributes' : [self.friction]})
 
 #includes any objects that are simply scenery
 class SceneryObject(GameObject):
@@ -109,8 +108,7 @@ class SceneryObject(GameObject):
         '''creates a dictionary of variables for saving specifically for Static Objects''' 
         #http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
         return utilities.merge_dicts(GameObject.to_dictionary(self),
-                {
-                'attributes' : [self.parallax_x, self.parallax_y, self.scale]})
+                {'attributes' : [self.parallax_x, self.parallax_y, self.scale]})
 
 #includes any objects that collide with player
 class DynamicObject(GameObject):
@@ -220,5 +218,4 @@ class DynamicObject(GameObject):
     def to_dictionary(self):
         '''creates a dictionary of variables for saving specifically for Dynamic Objects'''
         return utilities.merge_dicts(GameObject.to_dictionary(self),
-                {
-                'attributes' : [self.mass]})        
+                {'attributes' : [self.mass]})        

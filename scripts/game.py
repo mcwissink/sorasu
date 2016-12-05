@@ -115,7 +115,9 @@ class GameState():
         load level from a dictionary
         '''
         self.player = Player(**{key: value for (key, value) in dictionary['player'].items()})
-        enemies = [game_object.Enemy(**{key: value for (key, value) in i.items()}) for i in dictionary['enemy']]
+        enemies = [Enemy(**{key: value for (key, value) in i.items()}) for i in dictionary['enemies']]
+        for enemy in enemies: #no other way to reference player
+            enemy.player = self.player
         dynamic = [game_object.DynamicObject(**{key: value for (key, value) in i.items()}) for i in dictionary['dynamicEntities']]
         static = [game_object.StaticObject(**{key: value for (key, value) in i.items()}) for i in dictionary['staticEntities']]
         self.gameEntities = dynamic + static + enemies

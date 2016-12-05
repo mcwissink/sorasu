@@ -215,11 +215,9 @@ class EditorState(GameState):
                         if not self.continue_draw:
                             #setup a new draw
                             self.origin = self.init_pos
+                            self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons])
                             if self.draw_type == enemy.Enemy:
-                                #special case for enemy
-                                self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons], self.player)
-                            else:
-                                self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons])
+                                self.current_draw.player = self.player
                             self.continue_draw = True
                         else:
                             #finish draw
@@ -366,7 +364,7 @@ class EditorState(GameState):
         '''
         with open('../levels/' + name +'.txt', 'w') as file:
             # https://docs.python.org/2/library/json.html
-            file.write(json.dumps(game.to_dictionary(), indent = 2))
+            file.write(json.dumps(game.to_dictionary(), indent = 0))
     
     #function for initializing the menu
     def initialize_menu(self):
@@ -390,15 +388,15 @@ class EditorState(GameState):
         self.loadButton = button.Button(105, self.textbox.rect.bottom+4, self.button_font_big, (255,255,255), 100, 'Load', (0,0))
         def onLoadClick():
             if len(self.textbox.text) > 0:
-                try:
+                #try:
                     super(EditorState, self).load_game(self.textbox.text)
                     self.test_level = False
                     self.camera.viewport.x = self.player.rect.centerx 
                     self.camera.viewport.y = self.player.rect.centery
                     self.camera.target = 0
-                except Exception as e:
-                    print(e)
-                    pass
+                #except Exception as e:
+                    #print(e)
+                    #pass
         self.loadButton.onClick = onLoadClick
         self.loadButton.realign(self.camera)
         self.buttons.append(self.loadButton)
@@ -460,6 +458,7 @@ class EditorState(GameState):
         def onEnemyClick():
             self.draw_type = enemy.Enemy
             self.entity_variables(100, 300, self.draw_type)
+            self.parallax = (1,1)
         self.enemyButton.onClick = onEnemyClick
         self.enemyButton.realign(self.camera)
         self.buttons.append(self.enemyButton)
