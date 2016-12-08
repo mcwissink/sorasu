@@ -8,11 +8,12 @@ from pygame.locals import *
 
 '''source for code: http://www.pygame.org/pcr/inputbox/'''
 class TextBox():
-    def __init__(self, x, y, width, height, text=''):
+    def __init__(self, x, y, width, height, font, align):
         '''initilizes the textbox'''
         #set fonts
-        self.font = pygame.font.SysFont(None, 50)
-        self.text = text
+        self.font = font
+        self.text = ''
+        self.align = align # percent value for positioning on screen
         self.rect = pygame.Rect(x, y, width, height)
         self.rect.height = self.font.size(self.text)[1]
         self.text_list = []
@@ -28,7 +29,7 @@ class TextBox():
             screen.blit(self.font.render(self.text, 1, (255,255,255)), (self.rect.x+2, self.rect.y))
         
     def key_in(self, event):
-        "ask(screen, question) -> answer"
+        '''ask(screen, question) -> answer'''
         if event.type == pygame.KEYDOWN:
             if event.key == K_BACKSPACE:
                 self.text_list = self.text_list[0:-1]
@@ -40,3 +41,8 @@ class TextBox():
                 self.text = ''.join(self.text_list)
             else:
                 self.text = ''
+    
+    def realign(self, camera):
+        '''realigns the button based on the percent given to align'''
+        self.rect.x = camera.viewport.width*self.align[0] + self.offset[0]
+        self.rect.y = camera.viewport.height*self.align[1] + self.offset[1]

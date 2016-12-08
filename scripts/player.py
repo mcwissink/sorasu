@@ -8,10 +8,8 @@ import utilities
 from game_object import DynamicObject
 
 class Player(DynamicObject):
-    ''' 
-    Player game object for moving your character around
-    '''
     def __init__(self, x, y, offsets, attributes):
+        ''' Player game object for moving your character around'''
         DynamicObject.__init__(self, x, y, offsets, attributes)
         self.type = 'player'
         self.color = (255,0,0)
@@ -20,10 +18,7 @@ class Player(DynamicObject):
         self.past_up = self.past_down = self.past_left = self.past_right = True # Past key presses
         
     def input(self, keys, dt):
-        '''s
-        Takes input to check for keypresses
-        (dictionary)
-        '''  
+        '''Takes input to check for keypresses(dictionary)'''  
         '''Left and right movement'''
         if keys['right'] and not keys['left']: # Right movement
             if abs(self.vel.x) < self.max_vel:
@@ -46,9 +41,6 @@ class Player(DynamicObject):
         self.past_down = True if (keys['down']) else False
         self.past_left = True if (keys['left']) else False
         self.past_right = True if (keys['right']) else False
-        
-    def update(self, dt, entities):
-        DynamicObject.update(self, dt, entities)
         
     def to_dictionary(self):
         '''creates a dictionary of variables for saving specifically for Dynamic Objects'''

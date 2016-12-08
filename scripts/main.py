@@ -13,7 +13,6 @@ def main():
     #http://thepythongamebook.com/en:pygame:step006
     #set up the game and run the main loop`
     #os.environ['SDL_VIDEO_CENTERED'] = '1' #center window on the screen
-    #os.environ['SDL_VIDEODRIVER'] = 'directx'
     pygame.init() #initiate pygame
     screen = pygame.display.set_mode((900, 600), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
     clock = pygame.time.Clock() #initiates clock for time usage, such as deltatime and fps

@@ -32,7 +32,6 @@ class EditorState(GameState):
         self.camera.target = 0
         pygame.mouse.set_visible(True) # Make the mouse invisible
         #set up editor specific values and draws and buttons
-        button.buttons_init(self)
         self.attr_buttons = [] #used to store specific buttons
         self.attr_selected = None #used for changing values of objects
         self.editor_keys = {'up': False, 'down': False, 'left': False, 'right': False, 'ctrl': False, 'shift': False} #dictionary for key presses
@@ -40,7 +39,7 @@ class EditorState(GameState):
         #create the menu
         self.initialize_menu()
         #variables for all the editing - used later in the code
-        self.parallax = (1,1)
+        self.parallax = 1
         self.snap_to = (0, 0)
         self.line_to = [(0, 0), (0, 0)]
         self.init_pos = (0, 0)
@@ -57,7 +56,7 @@ class EditorState(GameState):
     def update(self, dt):
         '''run logic of the editor - and the game if it is active'''
         if self.draw_type == game_object.SceneryObject: #maybe try to remove this
-            self.parallax = (self.attr_buttons[0].value, self.attr_buttons[1].value) #makes handling parallax a little easier
+            self.parallax = self.attr_buttons[0].value#makes handling parallax a little easier
         #update the editor buttons
         button.buttons_update(self, self.buttons)
         #update the current snap function visuals
@@ -109,9 +108,7 @@ class EditorState(GameState):
             self.camera.update(self.editor_keys, dt)
         
     def draw(self, draw, screen):
-        '''
-        loop through objects and draw them
-        '''
+        '''loop through objects and draw them'''
         screen.fill(pygame.Color(255, 255, 255))
         for entity in self.backGroundEntities:
             entity.draw(screen, self.camera)
@@ -144,9 +141,7 @@ class EditorState(GameState):
         #draw the editor over top everything
         self.draw_menu(screen)
     def eventHandler(self, event):
-        '''
-        handles user inputs
-        '''
+        '''handles user inputs'''
         #special case
         if self.textbox.active:
             self.textbox.key_in(event)
@@ -233,15 +228,20 @@ class EditorState(GameState):
                             self.current_draw.rect.size = (position[0] - self.origin[0], position[1] - self.origin[1])
                             self.current_draw.rect.normalize()
                             self.current_draw.offsets = self.calculate_offset(self.origin, position)
-                            #adjust collision box if object is dynamic
+                            #adujust collision box for dynamic object, its the only way
                             if self.current_draw.dynamic:
                                 self.current_draw.adjust_collision()
                             #delete object if it is too small
                             if not (self.current_draw.rect.width < 0.2 or self.current_draw.rect.height < 0.2):
-                                self.get_layer().append(self.current_draw)
-                                
+                                layer = self.get_layer()
+                                layer.append(self.current_draw)
+                                #resort list to simulate depth
+                                if hasattr(self.current_draw, 'parallax'):
+                                    layer.sort(key=lambda x: x.parallax, reverse=False)
+                            #clear the draw variables   
                             self.current_draw = None
                             self.continue_draw = False
+                            
                     if self.tool == 2:
                         for entity in self.selected:
                             #initialize the drag
@@ -292,9 +292,7 @@ class EditorState(GameState):
                         self.selected = []          
 
     def calculate_offset(self, origin, position):
-        '''
-        calculates the necessary offsets for a shape
-        '''
+        '''calculates the necessary offsets for a shape'''
         #corrects offsets for negative rectangle values
         h = 1
         v = 1
@@ -316,9 +314,7 @@ class EditorState(GameState):
                 point_list.pop(3)
             return point_list
     def snap_to_corner(self, position, entity_list):
-        '''
-        snaps position to the nearest corner
-        '''
+        '''snaps position to the nearest corner'''
         min_dist = math.inf
         closest_pos = position
         for entity in entity_list:
@@ -330,9 +326,7 @@ class EditorState(GameState):
                         closest_pos = point
         return closest_pos
     def snap_to_plane(self, position, entity_list):
-        '''
-        snaps position to the nearest corner
-        '''
+        '''snaps position to the nearest corner'''
         closest_pos = self.snap_to_corner(position, entity_list)
         if abs(closest_pos[0] - position[0]) > abs(closest_pos[1] - position[1]):
             return [closest_pos, (position[0], closest_pos[1])]
@@ -340,9 +334,7 @@ class EditorState(GameState):
             return [closest_pos, (closest_pos[0], position[1])]
     
     def delete_object(self, position, entity_list):
-        '''
-        destroys object in list
-        '''
+        '''destroys object in list'''
         for i in reversed(range(len(entity_list))):
             if entity_list[i].rect.collidepoint(position):
                 entity_list.pop(i)
@@ -359,23 +351,19 @@ class EditorState(GameState):
             
         
     def save_game(self, name, game):
-        '''
-        converts the game into a txt file
-        '''
+        '''converts the game into a txt file'''
         with open('../levels/' + name +'.txt', 'w') as file:
             # https://docs.python.org/2/library/json.html
             file.write(json.dumps(game.to_dictionary(), indent = 0))
     
     #function for initializing the menu
     def initialize_menu(self):
-        '''
-        initializes the menu and the variables needed for it
-        '''
+        '''initializes the menu and the variables needed for it'''
         self.menu_back = pygame.Rect(0, 0, 200, 0) # height will get set in the draw method
-        #create the textbox for naming
-        self.textbox = textbox.TextBox(10, 10, 180, 0) # height will be set in the init
         self.button_font_big = pygame.font.SysFont(None, 40)
         self.button_font_small = pygame.font.SysFont(None, 20)
+        #create the textbox for naming
+        self.textbox = textbox.TextBox(10, 10, 180, 0, self.button_font_big, (0,0)) # height will be set in the init
         self.saveButton = button.Button(15, self.textbox.rect.bottom+4, self.button_font_big, (255,255,255), 100, 'Save', (0,0))
         #saves the game
         def onSaveClick():
@@ -432,7 +420,7 @@ class EditorState(GameState):
         def onStaticClick():
             self.draw_type = game_object.StaticObject
             self.entity_variables(100, 300, self.draw_type)
-            self.parallax = (1,1)
+            self.parallax = 1
         self.staticButton.onClick = onStaticClick
         self.staticButton.realign(self.camera)
         self.buttons.append(self.staticButton)
@@ -441,7 +429,7 @@ class EditorState(GameState):
         def onDynamicClick():
             self.draw_type = game_object.DynamicObject
             self.entity_variables(100, 300, self.draw_type)
-            self.parallax = (1,1)
+            self.parallax = 1
         self.dynamicButton.onClick = onDynamicClick
         self.dynamicButton.realign(self.camera)
         self.buttons.append(self.dynamicButton)
@@ -458,7 +446,7 @@ class EditorState(GameState):
         def onEnemyClick():
             self.draw_type = enemy.Enemy
             self.entity_variables(100, 300, self.draw_type)
-            self.parallax = (1,1)
+            self.parallax = 1
         self.enemyButton.onClick = onEnemyClick
         self.enemyButton.realign(self.camera)
         self.buttons.append(self.enemyButton)
@@ -488,9 +476,7 @@ class EditorState(GameState):
         self.attr_selected = 0
         self.buttons += self.attr_buttons
     def draw_menu(self, screen):
-        '''
-        draws the menu
-        '''
+        '''draws the menu'''
         #draw background of the side bar
         self.menu_back.height = screen.get_size()[1]
         pygame.draw.rect(screen, (0,0,0), self.menu_back)

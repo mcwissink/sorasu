@@ -6,7 +6,6 @@ parent class for all objects used in game
 
 import pygame, sys
 import math
-from test.test_importlib.import_.test_packages import ParentModuleTests
 
 def buttons_init(parent):
     ''''creates the necessary variables for the buttons'''
@@ -51,9 +50,7 @@ def buttons_mouseup(parent, buttons):
     parent.last_click = None
 
 def checkButtons(buttons, mouse):
-        '''
-        loop throgh all the buttons and check if clicked
-        '''
+        '''loop through all the buttons and check if clicked'''
         for button in buttons:
             if button.rect.collidepoint(mouse):
                 return button
@@ -91,14 +88,10 @@ class Button():
         self.hover = 0
     
     def draw(self, screen, camera):
-        '''
-        draw the button
-        '''
+        '''draw the button'''
         screen.blit(self.label, (self.rect.x, self.rect.y))
         
     def realign(self, camera):
-        '''
-        realigns the button based on the percent given to align
-        '''
+        '''realigns the button based on the percent given to align'''
         self.rect.x = camera.viewport.width*self.align[0] + self.offset[0]
         self.rect.y = camera.viewport.height*self.align[1] + self.offset[1]

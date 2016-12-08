@@ -14,9 +14,7 @@ from editor import EditorState
 
 class MenuState():
     def __init__(self):
-        '''
-        initiate the game
-        '''
+        '''initiate the menu'''
         self.camera = Camera(900, 600, 1)
         pygame.mouse.set_visible(True) # Make the mouse invisible
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
@@ -45,25 +43,19 @@ class MenuState():
         self.editorButton.realign(self.camera)
         self.buttons.append(self.editorButton)
     def update(self, dt):
-        '''
-        loop through objects and run logic
-        '''
+        '''loop through objects and run logic'''
         button.buttons_update(self, self.buttons)
         self.camera.update(self.keys, dt)
         
     def draw(self, draw, screen):
-        '''
-        loop through objects and draw them
-        '''
+        '''loop through objects and draw them'''
         screen.fill(pygame.Color(255, 255, 255))
         #draw logo
         self.draw_logo(screen, self.camera)
         button.buttons_draw(self, screen, self.buttons)
             
     def eventHandler(self, event):
-        '''
-        handles user inputs
-        '''
+        '''handles user inputs'''
         #check for key down
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
@@ -93,9 +85,7 @@ class MenuState():
             return button.buttons_mouseup(self, self.buttons)
     
     def draw_logo(self, screen, camera):
-        '''
-        draws the logo
-        '''
+        '''draws the logo'''
         width, height = self.title_font.size('Sorasu')
         pygame.draw.circle(screen, (255,0,0), camera.apply_single((0,0)), int(width/4))
         screen.blit(self.logo_text, camera.apply_single((self.logo_x-width/2, self.logo_y-height/2)))

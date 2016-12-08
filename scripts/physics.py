@@ -22,9 +22,7 @@ http://codereview.stackexchange.com/questions/47111/implementation-of-sat-separa
 http://stackoverflow.com/questions/6013333/separating-axis-theorem-and-python
 '''
 def collide(entity1, entity2):
-    '''
-    check for collisions between entities and then send resolving vector
-    '''
+    '''check for collisions between entities and then send resolving vector'''
     overlap = math.inf
     #obtain axis from entity2 assuming entity1 is the player and won't change its rotation
     axis_list = get_axis(entity2.get_corners())
@@ -45,10 +43,7 @@ def collide(entity1, entity2):
     return mtv
 
 def collide_test(entity1, entity2):
-    '''
-    check for collisions between entities with the dynamics test offsets
-    only for checking
-    '''
+    '''check for collisions between entities with the dynamics test offsets only for checking'''
     #obtain axis from entity2 assuming entity1 is the player and won't change its rotation
     axis_list = get_axis(entity2.get_corners())
     for axis in axis_list:
@@ -62,9 +57,7 @@ def collide_test(entity1, entity2):
                 return False
     return True
 def get_axis(corners):
-    '''
-    gets all the axis necessary for collision
-    '''
+    '''gets all the axis necessary for collisio'''
     axis = []
     for i in range(len(corners)):
         #create axis and make it perpendicular to face
@@ -73,9 +66,7 @@ def get_axis(corners):
         axis.append(vec)
     return axis
 def project(axis, corners):
-    '''
-    project the points on the axis
-    '''
+    '''project the points on the axis'''
     min_point = dot_product(corners[0], axis)
     max_point = min_point
     for i in range(len(corners)):
@@ -88,32 +79,29 @@ def project(axis, corners):
     return projection
 
 def perpendicular(vec):
-    '''
-    Return the perpendicular vector.
-    '''
+    '''Return the perpendicular vector.'''
     new_vec = (vec[1], -vec[0])
     return new_vec
 
 def dot_product(vec1, vec2):
-    '''
-    Calculate the dot product of two vectors.
-    '''
+    '''Calculate the dot product of two vectors.'''
     x1, y1 = vec1
     x2, y2 = vec2
     return x1*x2 + y1*y2
 
 def normalize(vec):
-    '''
-    Normalize a given vector.
-    '''
+    '''Normalize a given vector.'''
     # Average time: 9.633639630529273e-07s
     x, y = vec
-    magnitude = 1/math.hypot(x, y)
+    try:
+        magnitude = 1/math.hypot(x, y)
+    except:
+        magnitude = 0
     return magnitude*x, magnitude*y
 
 def resolve_collision(entity1, entity2):
-    '''resolve collision between two objects
-    https://gamedevelopment.tutsplus.com/tutorials/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331'''
+    '''resolve collision between two objects'''
+    #https://gamedevelopment.tutsplus.com/tutorials/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331
     res_vec = entity2.vel - entity1.vel
     normal = pygame.math.Vector2(normalize(res_vec))
     #calculate relative velocity in terms of the normal direction
