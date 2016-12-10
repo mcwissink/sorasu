@@ -18,7 +18,8 @@ def main():
     clock = pygame.time.Clock() #initiates clock for time usage, such as deltatime and fps
     pygame.display.set_caption('Sorasu') #set the title of the application
     pygame.display.set_icon(utilities.load('icon.png')) #set image for application
-    currentState = MenuState()
+    states = [MenuState, GameState, EditorState] #used for switching states within states
+    currentState = MenuState(states)
     #main game loop
     while True:
         deltaTime = clock.tick()/1000.0 #get time pasted between each frame in seconds

@@ -17,27 +17,18 @@ from camera import Camera
 from player import Player
 
 class EditorState(GameState):
-    def __init__(self, file_name=None):
-        '''initiate the editor'''  
-        super(EditorState, self).__init__(file_name) #initialize the game
-        if file_name is None: #load the base for a level
-            self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], [10, 0.9])
-            self.player.adjust_collision()
-            self.gameEntities.append(self.player)
-            self.camera = Camera(900, 600, 0)
-            self.camera.resize(pygame.display.get_surface())
+    def __init__(self, states):
+        '''initiate the editor''' 
+        super(EditorState, self).__init__(states) #initialize the game, also initializes the menu
+        #setup player
+        self.player = Player(0, 0, [(0,0),(0,40),(20,40),(20,0)], [10, 0.9])
+        self.player.adjust_collision()
+        self.gameEntities.append(self.player)
         #center the camera on the player
         self.camera.viewport.x = self.player.rect.centerx 
         self.camera.viewport.y = self.player.rect.centery
-        self.camera.target = 0
-        pygame.mouse.set_visible(True) # Make the mouse invisible
-        #set up editor specific values and draws and buttons
-        self.attr_buttons = [] #used to store specific buttons
-        self.attr_selected = None #used for changing values of objects
+        self.camera.target = 0 
         self.editor_keys = {'up': False, 'down': False, 'left': False, 'right': False, 'ctrl': False, 'shift': False} #dictionary for key presses
-        self.test_level = False
-        #create the menu
-        self.initialize_menu()
         #variables for all the editing - used later in the code
         self.parallax = 1
         self.snap_to = (0, 0)
@@ -101,8 +92,9 @@ class EditorState(GameState):
                         entity.pos[1] = entity.rect.y 
                         entity.spawn = (entity.rect.x, entity.rect.y)
         #perform game logic if game is running
-        if self.test_level:
-            super(EditorState, self).update(dt)   
+        if not self.pause:
+            #run the game
+            super(EditorState, self).update(dt)
         else:
             #otherwise run regular camera
             self.camera.update(self.editor_keys, dt)
@@ -146,7 +138,7 @@ class EditorState(GameState):
         if self.textbox.active:
             self.textbox.key_in(event)
         else:
-            if self.test_level:
+            if not self.pause:
                 super(EditorState, self).eventHandler(event)
             #check for key down
             if event.type == pygame.KEYDOWN:
@@ -189,7 +181,7 @@ class EditorState(GameState):
                 if event.key == pygame.K_8:
                     self.draw_shape = 0
                 if event.key == pygame.K_p:
-                    self.test_level = not self.test_level
+                    self.pause = not self.pause
                     if self.camera.target == self.player:
                         self.camera.target = 0
                     else:
@@ -270,7 +262,7 @@ class EditorState(GameState):
                     self.textbox.active = True
                 else:
                     self.textbox.active = False
-                button.buttons_mouseup(self, self.buttons)
+                return button.buttons_mouseup(self, self.buttons)
             #clicking not in the menu
             else:
                 self.textbox.active = False 
@@ -359,6 +351,9 @@ class EditorState(GameState):
     #function for initializing the menu
     def initialize_menu(self):
         '''initializes the menu and the variables needed for it'''
+        #set up editor specific values and draws and buttons
+        self.attr_buttons = [] #used to store specific buttons
+        self.attr_selected = None #used for changing values of objects
         self.menu_back = pygame.Rect(0, 0, 200, 0) # height will get set in the draw method
         self.button_font_big = pygame.font.SysFont(None, 40)
         self.button_font_small = pygame.font.SysFont(None, 20)
@@ -373,18 +368,17 @@ class EditorState(GameState):
         self.saveButton.realign(self.camera)
         self.buttons.append(self.saveButton)
         #loads the game
-        self.loadButton = button.Button(105, self.textbox.rect.bottom+4, self.button_font_big, (255,255,255), 100, 'Load', (0,0))
+        self.loadButton = button.Button(self.saveButton.rect.right + 10, self.saveButton.rect.y, self.button_font_big, (255,255,255), 100, 'Load', (0,0))
         def onLoadClick():
             if len(self.textbox.text) > 0:
-                #try:
-                    super(EditorState, self).load_game(self.textbox.text)
-                    self.test_level = False
+                try:
+                    super(EditorState, self).start_game(self.textbox.text)
+                    self.pause = True
                     self.camera.viewport.x = self.player.rect.centerx 
                     self.camera.viewport.y = self.player.rect.centery
                     self.camera.target = 0
-                #except Exception as e:
-                    #print(e)
-                    #pass
+                except Exception:
+                    pass
         self.loadButton.onClick = onLoadClick
         self.loadButton.realign(self.camera)
         self.buttons.append(self.loadButton)
@@ -394,7 +388,7 @@ class EditorState(GameState):
             for entity in self.gameEntities:
                 if entity.dynamic:
                     entity.reset()
-            self.test_level = False
+            self.pause = True
             #reset the camera to the player
             self.camera.target = 0
             self.camera.viewport.x = self.player.rect.centerx 
@@ -402,6 +396,13 @@ class EditorState(GameState):
         self.resetButton.onClick = onResetClick
         self.resetButton.realign(self.camera)
         self.buttons.append(self.resetButton)
+        #goes back to menu
+        self.backButton = button.Button(self.resetButton.rect.right + 10, self.resetButton.rect.y, self.button_font_big, (255,255,255), 100,'Back', (0,0), True)
+        def onBackClick():
+            return self.states[0](self.states)
+        self.backButton.onClick = onBackClick
+        self.backButton.realign(self.camera)
+        self.buttons.append(self.backButton)
         #tools button
         self.toolsButton = button.Button(15, self.resetButton.rect.bottom+20, self.button_font_big, (255,255,255), 100, 'D  E  S', (0,0))
         def onToolsClick():
@@ -452,7 +453,15 @@ class EditorState(GameState):
         self.buttons.append(self.enemyButton)
         #load the variables that can be edited
         self.entity_variables(100, 300, game_object.StaticObject) #this would normally pass in self.draw_type
-        
+     
+    def draw_menu(self, screen):
+        '''draws the menu'''
+        #draw background of the side bar
+        self.menu_back.height = screen.get_size()[1]
+        pygame.draw.rect(screen, (0,0,0), self.menu_back)
+        self.textbox.draw(screen)
+        button.buttons_draw(self, screen, self.buttons)
+ 
     def entity_variables(self, x, y, entity_type):
         #clear the current buttons in the list
         for attr_button in self.attr_buttons:
@@ -475,11 +484,4 @@ class EditorState(GameState):
             self.attr_buttons.append(varButton)
         self.attr_selected = 0
         self.buttons += self.attr_buttons
-    def draw_menu(self, screen):
-        '''draws the menu'''
-        #draw background of the side bar
-        self.menu_back.height = screen.get_size()[1]
-        pygame.draw.rect(screen, (0,0,0), self.menu_back)
-        self.textbox.draw(screen)
-        button.buttons_draw(self, screen, self.buttons)
         

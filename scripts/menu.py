@@ -9,12 +9,11 @@ import math
 import utilities
 import button
 from camera import Camera
-from game import GameState
-from editor import EditorState
 
 class MenuState():
-    def __init__(self):
+    def __init__(self, states):
         '''initiate the menu'''
+        self.states = states
         self.camera = Camera(900, 600, 1)
         pygame.mouse.set_visible(True) # Make the mouse invisible
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
@@ -32,13 +31,13 @@ class MenuState():
         self.logo_x, self.logo_y = (0,0)
         self.gameButton = button.Button(75, 75, self.button_font, (0,0,0), 100, 'Game',(0.5,0.5), True)
         def onGameClick():
-            return GameState('test')
+            return self.states[1](self.states)
         self.gameButton.onClick = onGameClick
         self.gameButton.realign(self.camera)
         self.buttons.append(self.gameButton)
         self.editorButton = button.Button(-300, 75, self.button_font, (0,0,0), 100, 'Editor', (0.5,0.5), True)
         def onEditorClick():
-            return EditorState()
+            return self.states[2](self.states)
         self.editorButton.onClick = onEditorClick
         self.editorButton.realign(self.camera)
         self.buttons.append(self.editorButton)

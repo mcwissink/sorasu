@@ -13,6 +13,7 @@ class TextBox():
         #set fonts
         self.font = font
         self.text = ''
+        self.offset = (x,y)
         self.align = align # percent value for positioning on screen
         self.rect = pygame.Rect(x, y, width, height)
         self.rect.height = self.font.size(self.text)[1]

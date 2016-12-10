@@ -1,5 +1,10 @@
 {
+"dynamicEntities": [],
+"enemies": [],
+"foreGroundEntities": [],
 "player": {
+"y": 0,
+"x": 0,
 "offsets": [
 [
 0,
@@ -18,68 +23,35 @@
 0
 ]
 ],
-"y": 0,
 "attributes": [
 10
-],
-"x": 0
+]
 },
-"foreGroundEntities": [],
-"dynamicEntities": [],
 "staticEntities": [
 {
+"y": 106,
+"offsets": [
+[
+0,
+0
+],
+[
+0,
+207
+],
+[
+417,
+207
+],
+[
+417,
+0
+]
+],
 "attributes": [
 1
 ],
-"offsets": [
-[
-0,
-0
-],
-[
-0,
-149
-],
-[
-436,
-149
-],
-[
-436,
-0
-]
-],
-"y": 68,
-"x": -116
-}
-],
-"enemies": [
-{
-"offsets": [
-[
-0,
-0
-],
-[
-0,
-77
-],
-[
-80,
-77
-],
-[
-80,
-0
-]
-],
-"y": -52,
-"attributes": [
-10,
-10,
-10
-],
-"x": 123
+"x": -73
 }
 ],
 "backGroundEntities": []
