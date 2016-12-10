@@ -65,13 +65,11 @@ class StaticObject(GameObject):
 #includes any objects that are simply scenery
 class SceneryObject(GameObject):
     #these are the parameters that you can edit in the editor
-    ATTRIBUTES = [{'name': 'Parallax', 'init': 1, 'max': 2, 'min': 0, 'step': 0.01}, #always make sure parallax is first
-                  {'name': 'Scale', 'init': 0.1, 'max': 5, 'min': 0, 'step': 0.1}]
+    ATTRIBUTES = [{'name': 'Parallax', 'init': 1, 'max': 2, 'min': 0, 'step': 0.01}] #always make sure parallax is first
     def __init__(self, x, y, offsets, attributes):
         '''scenery objects are for effects and stuff'''
         GameObject.__init__(self, x, y, offsets)
         self.parallax = attributes[0]
-        self.scale = attributes[1]
         self.type = 'scenery'
         if self.parallax <= 1:
             color_adjust = 255-255*self.parallax
@@ -106,7 +104,7 @@ class SceneryObject(GameObject):
         '''creates a dictionary of variables for saving specifically for Static Objects''' 
         #http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
         return utilities.merge_dicts(GameObject.to_dictionary(self),
-                {'attributes' : [self.parallax, self.scale]})
+                {'attributes' : [self.parallax]})
 
 #includes any objects that collide with player
 class DynamicObject(GameObject):

@@ -12,6 +12,7 @@ import enemy
 import utilities
 import button
 import textbox
+import door
 from game import GameState
 from camera import Camera
 from player import Player
@@ -137,6 +138,8 @@ class EditorState(GameState):
         #special case
         if self.textbox.active:
             self.textbox.key_in(event)
+        elif self.door_textbox.active:
+            self.door_textbox.key_in(event)
         else:
             if not self.pause:
                 super(EditorState, self).eventHandler(event)
@@ -202,8 +205,13 @@ class EditorState(GameState):
                         if not self.continue_draw:
                             #setup a new draw
                             self.origin = self.init_pos
-                            self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons])
-                            if self.draw_type == enemy.Enemy:
+                            if self.draw_type == door.Door: #special treatment for door
+                                self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], self.door_textbox.text)
+                                self.current_draw.gameRef = self
+                            else:   
+                                self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons])
+                            #append player if necessary
+                            if self.draw_type == enemy.Enemy or self.draw_type == door.Door:
                                 self.current_draw.player = self.player
                             self.continue_draw = True
                         else:
@@ -262,9 +270,14 @@ class EditorState(GameState):
                     self.textbox.active = True
                 else:
                     self.textbox.active = False
+                if self.door_textbox.rect.collidepoint(pygame.mouse.get_pos()):
+                    self.door_textbox.active = True
+                else:
+                    self.door_textbox.active = False
                 return button.buttons_mouseup(self, self.buttons)
             #clicking not in the menu
             else:
+                self.door_textbox.active = False
                 self.textbox.active = False 
                 #left mouse button
                 if self.tool == 2:
@@ -338,6 +351,8 @@ class EditorState(GameState):
                 return self.foreGroundEntities
             else:
                 return self.backGroundEntities
+        elif self.draw_type == door.Door:
+            return self.backGroundEntities
         else:
             return self.gameEntities
             
@@ -357,7 +372,9 @@ class EditorState(GameState):
         self.menu_back = pygame.Rect(0, 0, 200, 0) # height will get set in the draw method
         self.button_font_big = pygame.font.SysFont(None, 40)
         self.button_font_small = pygame.font.SysFont(None, 20)
-        #create the textbox for naming
+        # used for inputing text for the door object
+        self.door_textbox = textbox.TextBox(-100, 200, 100, 0, self.button_font_big, (0,0))
+        #create the textbox for getting file names
         self.textbox = textbox.TextBox(10, 10, 180, 0, self.button_font_big, (0,0)) # height will be set in the init
         self.saveButton = button.Button(15, self.textbox.rect.bottom+4, self.button_font_big, (255,255,255), 100, 'Save', (0,0))
         #saves the game
@@ -420,8 +437,9 @@ class EditorState(GameState):
         self.staticButton = button.Button(15, -100, self.button_font_big, (255,255,255), 100, 'Static', (0,1))
         def onStaticClick():
             self.draw_type = game_object.StaticObject
-            self.entity_variables(100, 300, self.draw_type)
+            self.entity_variables(10, 200, self.draw_type)
             self.parallax = 1
+            self.toggle_door_textbox()
         self.staticButton.onClick = onStaticClick
         self.staticButton.realign(self.camera)
         self.buttons.append(self.staticButton)
@@ -429,8 +447,9 @@ class EditorState(GameState):
         self.dynamicButton = button.Button(15, -150, self.button_font_big, (255,255,255), 100, 'Dynamic', (0,1))
         def onDynamicClick():
             self.draw_type = game_object.DynamicObject
-            self.entity_variables(100, 300, self.draw_type)
+            self.entity_variables(10, 200, self.draw_type)
             self.parallax = 1
+            self.toggle_door_textbox()
         self.dynamicButton.onClick = onDynamicClick
         self.dynamicButton.realign(self.camera)
         self.buttons.append(self.dynamicButton)
@@ -438,21 +457,33 @@ class EditorState(GameState):
         self.sceneryButton = button.Button(15, -200, self.button_font_big, (255,255,255), 100, 'Scenery', (0,1))
         def onSceneryClick():
             self.draw_type = game_object.SceneryObject
-            self.entity_variables(100, 300, self.draw_type)
+            self.entity_variables(10, 200, self.draw_type)
+            self.toggle_door_textbox()
         self.sceneryButton.onClick = onSceneryClick
         self.sceneryButton.realign(self.camera)
         self.buttons.append(self.sceneryButton)
-        #sets draw type to Scenery
+        #sets draw type to enemy
         self.enemyButton = button.Button(15, -250, self.button_font_big, (255,255,255), 100, 'Enemy', (0,1))
         def onEnemyClick():
             self.draw_type = enemy.Enemy
-            self.entity_variables(100, 300, self.draw_type)
+            self.entity_variables(10, 200, self.draw_type)
             self.parallax = 1
+            self.toggle_door_textbox()
         self.enemyButton.onClick = onEnemyClick
         self.enemyButton.realign(self.camera)
         self.buttons.append(self.enemyButton)
+        #sets draw type to door
+        self.doorButton = button.Button(15, -300, self.button_font_big, (255,255,255), 100, 'Door', (0,1))
+        def onDoorClick():
+            self.draw_type = door.Door
+            self.entity_variables(10, 200, self.draw_type)
+            self.parallax = 1
+            self.toggle_door_textbox()
+        self.doorButton.onClick = onDoorClick
+        self.doorButton.realign(self.camera)
+        self.buttons.append(self.doorButton)
         #load the variables that can be edited
-        self.entity_variables(100, 300, game_object.StaticObject) #this would normally pass in self.draw_type
+        self.entity_variables(10, 200, game_object.StaticObject) #this would normally pass in self.draw_type
      
     def draw_menu(self, screen):
         '''draws the menu'''
@@ -460,8 +491,17 @@ class EditorState(GameState):
         self.menu_back.height = screen.get_size()[1]
         pygame.draw.rect(screen, (0,0,0), self.menu_back)
         self.textbox.draw(screen)
+        self.door_textbox.draw(screen)
         button.buttons_draw(self, screen, self.buttons)
- 
+    
+    def toggle_door_textbox(self):
+        '''simple fix for togling the textbox'''
+        if self.draw_type == door.Door:
+            self.door_textbox.rect.x = 10
+        else:
+            self.door_textbox.rect.x = -100
+            self.door_textbox.text = ''
+
     def entity_variables(self, x, y, entity_type):
         #clear the current buttons in the list
         for attr_button in self.attr_buttons:

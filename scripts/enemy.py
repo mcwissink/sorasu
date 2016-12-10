@@ -1,6 +1,6 @@
 ''' CS 108
 Created Fall 2016
-child of DynamicObject that the user can control
+child of DynamicObject that attacks player
 @author: Mark Wissink (mcw33)
 '''
 import pygame, sys, math
@@ -32,6 +32,7 @@ class Enemy(DynamicObject):
         self.timer = 100
 
     def update(self, dt, entities):
+        #self.player is set in the level load function
         if abs(self.player.rect.centerx - self.rect.centerx) < self.radius:
             '''Left and right movement'''
             if self.player.rect.centerx > self.rect.centerx: # Right movement

@@ -1,0 +1,83 @@
+{
+"dynamicEntities": [],
+"staticEntities": [
+{
+"offsets": [
+[
+0,
+0
+],
+[
+0,
+144
+],
+[
+495,
+144
+],
+[
+495,
+0
+]
+],
+"x": -148,
+"y": 46,
+"attributes": [
+1
+]
+}
+],
+"player": {
+"offsets": [
+[
+0,
+0
+],
+[
+0,
+40
+],
+[
+20,
+40
+],
+[
+20,
+0
+]
+],
+"x": 0,
+"y": 0,
+"attributes": [
+10
+]
+},
+"enemies": [],
+"foreGroundEntities": [],
+"doors": [
+{
+"offsets": [
+[
+0,
+0
+],
+[
+0,
+107
+],
+[
+79,
+107
+],
+[
+79,
+0
+]
+],
+"x": 239,
+"y": -40,
+"link": "test2"
+}
+],
+"backGroundEntities": []
+}

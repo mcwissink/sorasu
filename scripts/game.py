@@ -14,6 +14,7 @@ import textbox
 from camera import Camera
 from player import Player
 from enemy import Enemy
+from door import Door
 
 class GameState():
     def __init__(self, states): 
@@ -167,23 +168,29 @@ class GameState():
         return {
                 'player' : self.player.to_dictionary(),
                 'enemies' : [entity.to_dictionary() for entity in self.gameEntities if entity.type == 'enemy'],
+                'doors' : [entity.to_dictionary() for entity in self.backGroundEntities if entity.type == 'door'],
                 'dynamicEntities' : [entity.to_dictionary() for entity in self.gameEntities if entity.type == 'dynamic'],
                 'staticEntities' : [entity.to_dictionary() for entity in self.gameEntities if entity.type == 'static'],
-                'backGroundEntities' : [scenery.to_dictionary() for scenery in self.backGroundEntities],
+                'backGroundEntities' : [scenery.to_dictionary() for scenery in self.backGroundEntities if scenery.type == 'scenery'],
                 'foreGroundEntities' : [scenery.to_dictionary() for scenery in self.foreGroundEntities]
                 }
     def from_dictionary(self, dictionary):
         '''load level from a dictionary'''
         self.player = Player(**{key: value for (key, value) in dictionary['player'].items()})
         enemies = [Enemy(**{key: value for (key, value) in i.items()}) for i in dictionary['enemies']]
+        doors = [Door(**{key: value for (key, value) in i.items()}) for i in dictionary['doors']]
         for enemy in enemies: #no other way to reference player
             enemy.player = self.player
+        for door in doors: #no other way to reference player and game
+            door.player = self.player
+            door.gameRef = self
         dynamic = [game_object.DynamicObject(**{key: value for (key, value) in i.items()}) for i in dictionary['dynamicEntities']]
         static = [game_object.StaticObject(**{key: value for (key, value) in i.items()}) for i in dictionary['staticEntities']]
         self.gameEntities = dynamic + static + enemies
         self.gameEntities.append(self.player)
-        self.backGroundEntities = [game_object.SceneryObject(**{key: value for (key, value) in i.items()}) for i in dictionary['backGroundEntities']]
+        backGround = [game_object.SceneryObject(**{key: value for (key, value) in i.items()}) for i in dictionary['backGroundEntities']]
         self.foreGroundEntities = [game_object.SceneryObject(**{key: value for (key, value) in i.items()}) for i in dictionary['foreGroundEntities']]
+        self.backGroundEntities = backGround + doors
     
     def load_game(self, file_name):
         '''loads game from text file'''
