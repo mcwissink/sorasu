@@ -56,7 +56,7 @@ class Enemy(DynamicObject):
     def on_collide(self, entities, entity):
         '''called on collision'''
         if entity.type == 'player':
-            if self.player.deadly: #kill enemy
+            if self.player.deadly and not self.frozen: #kill enemy
                 entities.remove(self)
             else: #reduce health otherwise
                 self.player.health -= 1

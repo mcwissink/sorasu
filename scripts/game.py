@@ -211,6 +211,7 @@ class GameState():
             self.camera = Camera(900, 600, self.player)
             self.camera.resize(pygame.display.get_surface())
     def reset_game(self):
+        '''resets the game'''
         for entity in self.gameEntities:
             if entity.dynamic:
                 entity.reset()

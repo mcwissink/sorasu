@@ -100,7 +100,7 @@ class Player(DynamicObject):
     def on_collide(self, entities, entity):
         '''called on collision'''
         if entity.type == 'enemy':
-            if self.deadly: #kill enemy
+            if self.deadly and not entity.frozen: #kill enemy
                 entities.remove(entity)
             else: #reduce health otherwise
                 self.health -= 1

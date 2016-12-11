@@ -361,7 +361,7 @@ class EditorState(GameState):
         '''converts the game into a txt file'''
         with open('../levels/' + name +'.txt', 'w') as file:
             # https://docs.python.org/2/library/json.html
-            file.write(json.dumps(game.to_dictionary(), indent = 0))
+            file.write(json.dumps(game.to_dictionary()))
     
     #function for initializing the menu
     def initialize_menu(self):
