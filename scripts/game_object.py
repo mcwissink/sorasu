@@ -132,11 +132,14 @@ class DynamicObject(GameObject):
         self.collision_wall = False #flag for collisions
         self.onground = False
         self.onwall = 0
+        self.frozen = False
         #adjust collision
         self.adjust_collision()
         
     def update(self, dt, entities):
         '''updates and applies physics'''
+        if self.frozen: #dont do anything
+            return
         #move the character
         self.pos += self.vel * 0.5 * dt
         if abs(self.vel.x) > 0.1:
@@ -157,6 +160,7 @@ class DynamicObject(GameObject):
                         self.collision_ground = True
                     vec = physics.collide(self, entity)
                     if vec:
+                        self.on_collide(entities, entity)
                         self.pos -= vec
                         self.move()
                         #correct the velocity based on the vec return --- Nathan Brink
@@ -182,6 +186,9 @@ class DynamicObject(GameObject):
         if not self.collision_wall or self.onground:
             #reset wall variables if not wall collision
             self.onwall = 0
+    def on_collide(self, entities, entity):
+        '''called when object collides'''
+        pass
 
     def move(self):
         '''moves the object'''

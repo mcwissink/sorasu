@@ -29,8 +29,8 @@ class GameState():
         self.camera.resize(pygame.display.get_surface())
         self.pause = True
         self.player = None
-        self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
-
+        self.keys = {'up': False, 'down': False, 'left': False, 'right': False, 'dash': False} #dictionary for key presses
+        self.current_file = None
         self.initialize_menu()#initialize the menu
                 
     def update(self, dt):
@@ -49,9 +49,11 @@ class GameState():
                     entity.update(dt)
             for entity in self.foreGroundEntities:
                 entity.update(dt)
+            if self.player.health < 0: #reset if player dies
+                self.start_game(self.current_file)
         #update the camera
         self.camera.update(self.keys, dt)
-
+            
     def draw(self, draw, screen):
         '''loop through objects and draw them'''
         screen.fill(pygame.Color(255, 255, 255))
@@ -79,6 +81,8 @@ class GameState():
                     self.keys['left'] = True
                 if event.key == pygame.K_RIGHT:
                     self.keys['right'] = True
+                if event.key == pygame.K_z:
+                    self.keys['dash'] = True
             #check if for key up
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_UP:
@@ -89,7 +93,8 @@ class GameState():
                     self.keys['left'] = False
                 if event.key == pygame.K_RIGHT:
                     self.keys['right'] = False
-
+                if event.key == pygame.K_z:
+                    self.keys['dash'] = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             button.buttons_mousedown(self, self.buttons)
         #check if mouse up
@@ -201,6 +206,11 @@ class GameState():
     def start_game(self, file_name):
         '''start the game'''
         if file_name is not None:
+            self.current_file = file_name
             self.load_game(file_name)
             self.camera = Camera(900, 600, self.player)
             self.camera.resize(pygame.display.get_surface())
+    def reset_game(self):
+        for entity in self.gameEntities:
+            if entity.dynamic:
+                entity.reset()

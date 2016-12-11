@@ -402,9 +402,7 @@ class EditorState(GameState):
         #resets the game
         self.resetButton = button.Button(15, self.loadButton.rect.bottom+10, self.button_font_big, (255,255,255), 100, 'Reset', (0,0))
         def onResetClick():
-            for entity in self.gameEntities:
-                if entity.dynamic:
-                    entity.reset()
+            self.reset_game()
             self.pause = True
             #reset the camera to the player
             self.camera.target = 0

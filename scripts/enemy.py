@@ -13,7 +13,7 @@ class Enemy(DynamicObject):
     enemy for attacking player
     '''
     ATTRIBUTES = [{'name': 'Mass', 'init': 10, 'max': 100, 'min': 1, 'step': 1},
-                  {'name': 'Speed', 'init': 10, 'max': 50, 'min': 1, 'step': 1},
+                  {'name': 'Speed', 'init': 10, 'max': 50, 'min': 0, 'step': 1},
                   {'name': 'Jump', 'init': 10, 'max': 30, 'min': 1, 'step': 1},
                   {'name': 'Engage', 'init': 10, 'max': 50, 'min': 1, 'step': 1}]
     def __init__(self, x, y, offsets, attributes):
@@ -30,8 +30,12 @@ class Enemy(DynamicObject):
         #stuff for ai movement
         self.offset = (0, 0)
         self.timer = 100
-
+        if self.speed == 0:
+            self.frozen = True
+        
     def update(self, dt, entities):
+        '''updates the enemy'''
+        DynamicObject.update(self, dt, entities)
         #self.player is set in the level load function
         if abs(self.player.rect.centerx - self.rect.centerx) < self.radius:
             '''Left and right movement'''
@@ -48,10 +52,16 @@ class Enemy(DynamicObject):
                 if self.onwall:
                     self.vel.y = -self.jump_height
                     self.vel.x += self.jump_height * self.onwall
-        DynamicObject.update(self, dt, entities)
-        
-        
+    
+    def on_collide(self, entities, entity):
+        '''called on collision'''
+        if entity.type == 'player':
+            if self.player.deadly: #kill enemy
+                entities.remove(self)
+            else: #reduce health otherwise
+                self.player.health -= 1
+  
     def to_dictionary(self):
         '''creates a dictionary of variables for saving specifically for Dynamic Objects'''
         return utilities.merge_dicts(DynamicObject.to_dictionary(self),
-                {'attributes' : [self.mass, self.speed, self.jump]}) 
+                {'attributes' : [self.mass, self.speed, self.jump, self.engage]}) 
