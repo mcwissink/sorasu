@@ -6,7 +6,13 @@ Runs the game
 import pygame, pygame.font, pygame.event, pygame.draw
 from pygame.locals import *
 
-'''source for code: http://www.pygame.org/pcr/inputbox/'''
+'''source for code: http://www.pygame.org/pcr/inputbox/
+Author: Timothy Downs
+Submission date: January 23, 2002
+
+Had to edit a lot of code to make it work in my game
+the main function that I referenced was the key_in function
+'''
 class TextBox():
     def __init__(self, x, y, width, height, font, align):
         '''initilizes the textbox'''

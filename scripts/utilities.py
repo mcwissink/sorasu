@@ -12,6 +12,8 @@ def load(image_location, alpha=True):
     @author: Kristofer Brink (kpb23)
     Loads an image from a location and auto does alpha unless if specified otherwise
     (string, bool) -> pygame surface
+    
+    optimizes performance for images used in game
     '''
     try:
         surface = pygame.image.load('../images/' + image_location)
@@ -30,8 +32,8 @@ def load(image_location, alpha=True):
 def merge_dicts(x, y):
     '''
     merges two dictionaries
+    reference: http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
     '''
-    #http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
     z = x.copy()
     z.update(y)
     return z

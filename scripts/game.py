@@ -112,13 +112,13 @@ class GameState():
     def initialize_menu(self):
         '''initializes the menu and the variables needed for it'''
         #create the textbox for naming
-        self.menu_back = pygame.Rect(0, 0, 400, 400) # x and y will get set in the draw method
+        self.menu_back = pygame.Rect(0, 0, 200, 200) # x and y will get set in the draw method
         self.button_font_big = pygame.font.SysFont(None, 40)
         self.button_font_small = pygame.font.SysFont(None, 20)
-        self.textbox = textbox.TextBox(0, 0, 180, 0, self.button_font_big, (0.5,0.5)) # height will be set in the init
+        self.textbox = textbox.TextBox(-90, -10, 180, 0, self.button_font_big, (0.5,0.5)) # height will be set in the init
         self.textbox.realign(self.camera)
         #saves the game
-        self.playButton = button.Button(-100, 100, self.button_font_big, (255,255,255), 100, 'Play', (0.5,0.5))
+        self.playButton = button.Button(-80, 50, self.button_font_big, (255,255,255), 100, 'Play', (0.5,0.5))
         def onPlayClick():
             if len(self.textbox.text) > 0:
                 try:
@@ -132,7 +132,7 @@ class GameState():
         self.playButton.realign(self.camera)
         self.buttons.append(self.playButton)
         #goes back to menu
-        self.backButton = button.Button(100, 100, self.button_font_big, (255,255,255), 100,'Back', (0.5,0.5), True)
+        self.backButton = button.Button(20, 50, self.button_font_big, (255,255,255), 100,'Back', (0.5,0.5), True)
         def onBackClick():
             return self.states[0](self.states)
         self.backButton.onClick = onBackClick

@@ -15,6 +15,7 @@ class MenuState():
         '''initiate the menu'''
         self.states = states
         self.camera = Camera(900, 600, 1)
+        self.camera.resize(pygame.display.get_surface())
         pygame.mouse.set_visible(True) # Make the mouse invisible
         self.keys = {'up': False, 'down': False, 'left': False, 'right': False} #dictionary for key presses
         #create buttons and other a e s t h e s t i c s

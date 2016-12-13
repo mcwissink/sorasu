@@ -7,17 +7,10 @@ import pygame, sys
 import math
 
 '''
-physics functions only apply if an entity's collision mask is a rectangle
-
-
-
+referenced material for creating library
 http://www.metanetsoftware.com/technique/tutorialA.html
-
 http://www.dyn4j.org/2010/01/sat/
-
 http://wiki.roblox.com/index.php?title=2D_Collision_Detection
-
-
 http://codereview.stackexchange.com/questions/47111/implementation-of-sat-separating-axis-theorem
 http://stackoverflow.com/questions/6013333/separating-axis-theorem-and-python
 '''
