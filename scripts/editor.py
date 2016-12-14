@@ -4,7 +4,7 @@ contains editor logic for creating levels
 @author: Mark Wissink (mcw33)
 '''
 
-import pygame, sys
+import pygame, sys, os
 import math, json
 import random
 import game_object
@@ -45,6 +45,8 @@ class EditorState(GameState):
         self.selected = [] #list for selected objects
         self.drag = False #used for selector
         
+        #load images for the game objects
+        scenery_images = self.load_images('scenery/')
     def update(self, dt):
         '''run logic of the editor - and the game if it is active'''
         if self.draw_type == game_object.SceneryObject: #maybe try to remove this
@@ -190,6 +192,7 @@ class EditorState(GameState):
                     else:
                         self.camera.target = self.player
         #check if mouse downs
+        '''This handles all the different tools and editor stuff'''
         if event.type == pygame.MOUSEBUTTONDOWN:
             #creates things 
             if self.menu_back.collidepoint(pygame.mouse.get_pos()):
@@ -206,14 +209,28 @@ class EditorState(GameState):
                             #setup a new draw
                             self.origin = self.init_pos
                             if self.draw_type == door.Door: #special treatment for door
-                                self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], self.door_textbox.text)
-                                self.current_draw.gameRef = self
+                                self.current_draw = self.draw_type(self, self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], self.door_textbox.text)
+                            elif self.draw_type == enemy.Enemy:
+                                self.current_draw = self.draw_type(self.player, self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons])
+                            elif self.draw_type == game_object.SceneryObject:
+                                self.current_draw = self.draw_type(self.texture_cache, self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons])
                             else:   
                                 self.current_draw = self.draw_type(self.origin[0], self.origin[1], [(1,1),(-1,1),(-1,-1),(1,-1)], [button.value for button in self.attr_buttons])
                             #append player if necessary
                             if self.draw_type == enemy.Enemy or self.draw_type == door.Door:
                                 self.current_draw.player = self.player
                             self.continue_draw = True
+                            
+                            #if the current draw is scenery with an image, just stamp it
+                            if self.draw_type == game_object.SceneryObject and self.current_draw.hasImage:
+                                self.current_draw.rect.centerx, self.current_draw.rect.centery = self.origin
+                                layer = self.get_layer()
+                                layer.append(self.current_draw)
+                                #resort list to simulate depth
+                                if hasattr(self.current_draw, 'parallax'):
+                                    layer.sort(key=lambda x: x.parallax, reverse=False)
+                                self.current_draw = None
+                                self.continue_draw = False
                         else:
                             #finish draw
                             #snap to corner
@@ -522,4 +539,18 @@ class EditorState(GameState):
             self.attr_buttons.append(varButton)
         self.attr_selected = 0
         self.buttons += self.attr_buttons
+    
+    def load_images(self, path):
+        ''' 
+        Loads image for the editor to use
+        @author: Kristofer Brink (kpb23) 
+        '''
+        files = sorted(os.listdir('../images/' + path))
+        files_png = [i for i in files if i.endswith('.png')]
+        images = {}
+        for i in files_png:
+            new_path = path + i
+            images[new_path] = self.texture_cache.load(new_path)
+        return images
+
         

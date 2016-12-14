@@ -65,22 +65,51 @@ class StaticObject(GameObject):
 #includes any objects that are simply scenery
 class SceneryObject(GameObject):
     #these are the parameters that you can edit in the editor
-    ATTRIBUTES = [{'name': 'Parallax', 'init': 1, 'max': 2, 'min': 0, 'step': 0.01}] #always make sure parallax is first
-    def __init__(self, x, y, offsets, attributes):
+    ATTRIBUTES = [{'name': 'Parallax', 'init': 1, 'max': 2, 'min': 0, 'step': 0.01},
+                  {'name': 'Scale', 'init': 1, 'max': 2, 'min': 0.1, 'step': 0.1},
+                  {'name': 'Rotation', 'init': 0, 'max': 360, 'min': 0, 'step': 5},
+                  {'name': 'Image', 'init': -1, 'max': 1, 'min': -1, 'step': 1}] #always make sure parallax is first
+    def __init__(self, texture_cache, x, y, offsets, attributes):
         '''scenery objects are for effects and stuff'''
         GameObject.__init__(self, x, y, offsets)
         self.parallax = attributes[0]
+        self.scale = attributes[1]
+        self.rotation = attributes[2]
+        self.image_dir = attributes[3]
+        #setup image
+        self.hasImage = True
+        print(self.image_dir)
+        if type(self.image_dir).__name__ == 'int':
+            if self.image_dir == -1:
+                self.hasImage = False
+            else:
+                self.image_dir = texture_cache.image_list[self.image_dir]
+        if self.hasImage:
+            surface = texture_cache.load(self.image_dir)
+            width, height = surface.get_size()
+            self.rect.width = int(width * self.scale)
+            self.rect.height = int(height * self.scale)
+            surface = pygame.transform.scale(surface, (self.rect.width, self.rect.height))
+            surface = pygame.transform.rotate(surface, self.rotation)
+            self.image = surface
         self.type = 'scenery'
         if self.parallax <= 1:
             color_adjust = 255-255*self.parallax
         else:
             color_adjust = 0
         self.color = (color_adjust,color_adjust,color_adjust)
+        if self.hasImage:
+            self.image = self.colorize(self.color)
+        
     def draw(self, screen, camera):
         '''draw function with parallax'''
         #translates points and draws polygon
-        translate_points = camera.apply(self.get_corners(), self.parallax)
-        pygame.draw.polygon(screen, self.color, translate_points, 0)
+        if self.hasImage:
+            translate = camera.apply_single((self.rect.x, self.rect.y), self.parallax)
+            screen.blit(self.image, translate)
+        else:   
+            translate_points = camera.apply(self.get_corners(), self.parallax)
+            pygame.draw.polygon(screen, self.color, translate_points, 0)
     
     def debug_draw(self, screen, camera):
         '''debug draw with parallax'''
@@ -88,23 +117,28 @@ class SceneryObject(GameObject):
         position = camera.apply_single((self.rect.x, self.rect.y), self.parallax)
         pygame.draw.rect(screen, (255,0,0), (position[0], position[1], self.rect.width, self.rect.height), 2)
         
-    def get_alpha_surface(self, surface, alpha=120, red=255, green=255, blue=255, mode=pygame.BLEND_RGBA_MULT):
-        """    
-        Allocate a new surface with user-defined values (0-255)
-        for red, green, blue and alpha.
-        http://www.pygame.org/docs/ref/surface.html for the different blend modes
-        Thanks to Claudio Canepa <ccanepacc@gmail.com>.
+    def colorize(self, newColor):
         """
-        blend = pygame.Surface(surface.get_size(), pygame.SRCALPHA, 32)
-        blend.fill((red,green,blue,alpha))
-        blend.blit(surface, (0,0), surface.get_rect(), mode)
-        return blend
+        Create a "colorized" copy of a surface (replaces RGB values with the given color, preserving the per-pixel alphas of
+        original).
+        :param image: Surface to create a colorized copy of
+        :param newColor: RGB color to use (original alpha values are preserved)
+        :return: New colorized Surface instance
+        """
+        surface = self.image.copy()
+    
+        # zero out RGB values
+        surface.fill((0, 0, 0, 255), None, pygame.BLEND_RGBA_MULT)
+        # add in new RGB values
+        surface.fill(newColor[0:3] + (0,), None, pygame.BLEND_RGBA_ADD)
+    
+        return surface
     
     def to_dictionary(self):
         '''creates a dictionary of variables for saving specifically for Static Objects''' 
         #http://stackoverflow.com/questions/38987/how-to-merge-two-python-dictionaries-in-a-single-expression
         return utilities.merge_dicts(GameObject.to_dictionary(self),
-                {'attributes' : [self.parallax]})
+                {'attributes' : [self.parallax, self.scale, self.rotation, self.image_dir]})
 
 #includes any objects that collide with player
 class DynamicObject(GameObject):

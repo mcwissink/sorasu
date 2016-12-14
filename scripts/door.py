@@ -13,8 +13,10 @@ class Door(GameObject):
     door for switching levels
     '''
     ATTRIBUTES = []
-    def __init__(self, x, y, offsets, link=''):
+    def __init__(self, gameRef, x, y, offsets, link=''):
         GameObject.__init__(self, x, y, offsets)
+        self.gameRef = gameRef
+        self.player = self.gameRef.player
         self.link = link #link to the next room
         self.type = 'door'
         self.color = (0,255,255)

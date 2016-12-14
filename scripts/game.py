@@ -24,6 +24,8 @@ class GameState():
         self.backGroundEntities = [] #scenery and other things that don't collide
         self.foreGroundEntities = [] #scenery and other things that don't collide
         button.buttons_init(self) #initialize the button class
+        #add texture cache for loading images
+        self.texture_cache = utilities.Texture_cache()
         #setup game stuff
         self.camera = Camera(900, 600, 0)
         self.camera.resize(pygame.display.get_surface())
@@ -126,8 +128,8 @@ class GameState():
                     self.camera.viewport.x = self.player.rect.centerx 
                     self.camera.viewport.y = self.player.rect.centery
                     self.switch_menu()
-                except Exception:
-                    pass
+                except Exception as e:
+                    print(e)
         self.playButton.onClick = onPlayClick
         self.playButton.realign(self.camera)
         self.buttons.append(self.playButton)
@@ -182,19 +184,14 @@ class GameState():
     def from_dictionary(self, dictionary):
         '''load level from a dictionary'''
         self.player = Player(**{key: value for (key, value) in dictionary['player'].items()})
-        enemies = [Enemy(**{key: value for (key, value) in i.items()}) for i in dictionary['enemies']]
-        doors = [Door(**{key: value for (key, value) in i.items()}) for i in dictionary['doors']]
-        for enemy in enemies: #no other way to reference player
-            enemy.player = self.player
-        for door in doors: #no other way to reference player and game
-            door.player = self.player
-            door.gameRef = self
+        enemies = [Enemy(self.player,**{key: value for (key, value) in i.items()}) for i in dictionary['enemies']]
+        doors = [Door(self,**{key: value for (key, value) in i.items()}) for i in dictionary['doors']]
         dynamic = [game_object.DynamicObject(**{key: value for (key, value) in i.items()}) for i in dictionary['dynamicEntities']]
         static = [game_object.StaticObject(**{key: value for (key, value) in i.items()}) for i in dictionary['staticEntities']]
         self.gameEntities = dynamic + static + enemies
         self.gameEntities.append(self.player)
-        backGround = [game_object.SceneryObject(**{key: value for (key, value) in i.items()}) for i in dictionary['backGroundEntities']]
-        self.foreGroundEntities = [game_object.SceneryObject(**{key: value for (key, value) in i.items()}) for i in dictionary['foreGroundEntities']]
+        backGround = [game_object.SceneryObject(self.texture_cache,**{key: value for (key, value) in i.items()}) for i in dictionary['backGroundEntities']]
+        self.foreGroundEntities = [game_object.SceneryObject(self.texture_cache,**{key: value for (key, value) in i.items()}) for i in dictionary['foreGroundEntities']]
         self.backGroundEntities = backGround + doors
     
     def load_game(self, file_name):

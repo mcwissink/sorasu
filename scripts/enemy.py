@@ -16,8 +16,9 @@ class Enemy(DynamicObject):
                   {'name': 'Speed', 'init': 10, 'max': 50, 'min': 0, 'step': 1},
                   {'name': 'Jump', 'init': 10, 'max': 30, 'min': 1, 'step': 1},
                   {'name': 'Engage', 'init': 10, 'max': 50, 'min': 1, 'step': 1}]
-    def __init__(self, x, y, offsets, attributes):
+    def __init__(self, player, x, y, offsets, attributes):
         DynamicObject.__init__(self, x, y, offsets, attributes)
+        self.player = player
         self.speed = attributes[1]
         self.jump = attributes[2]
         self.engage = attributes[3]
