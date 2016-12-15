@@ -176,7 +176,7 @@ class DynamicObject(GameObject):
         #move the character
         self.pos += self.vel * 0.5 * dt
         if abs(self.vel.x) > 0.1:
-            self.vel.x -= math.copysign(1, self.vel.x) * self.fric
+            self.vel.x -= math.copysign(1, self.vel.x) * self.fric * 4
         else:
             self.vel.x = 0
         self.vel.y += self.grav * dt #halfs the gravity if on wall
