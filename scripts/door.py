@@ -20,6 +20,7 @@ class Door(GameObject):
         self.link = link #link to the next room
         self.type = 'door'
         self.color = (0,255,255)
+        self.parallax = 1 #sorting purposes
 
     def update(self, dt):
         #player and gameRef get set elsewhere

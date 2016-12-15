@@ -68,7 +68,7 @@ class SceneryObject(GameObject):
     ATTRIBUTES = [{'name': 'Parallax', 'init': 1, 'max': 2, 'min': 0, 'step': 0.01},
                   {'name': 'Scale', 'init': 1, 'max': 2, 'min': 0.1, 'step': 0.1},
                   {'name': 'Rotation', 'init': 0, 'max': 360, 'min': 0, 'step': 5},
-                  {'name': 'Image', 'init': -1, 'max': 2, 'min': -1, 'step': 1}] #always make sure parallax is first
+                  {'name': 'Image', 'init': -1, 'max': 4, 'min': -1, 'step': 1}] #always make sure parallax is first
     def __init__(self, texture_cache, x, y, offsets, attributes):
         '''scenery objects are for effects and stuff'''
         GameObject.__init__(self, x, y, offsets)
@@ -78,7 +78,6 @@ class SceneryObject(GameObject):
         self.image_dir = attributes[3]
         #setup image
         self.hasImage = True
-        print(self.image_dir)
         if type(self.image_dir).__name__ == 'int':
             if self.image_dir == -1:
                 self.hasImage = False
@@ -199,9 +198,9 @@ class DynamicObject(GameObject):
                         self.move()
                         #correct the velocity based on the vec return --- Nathan Brink
                         res_vec = pygame.math.Vector2(physics.normalize(vec)) * physics.dot_product(physics.normalize(vec), self.vel)
-                        if entity.dynamic:
+                        if entity.dynamic and not res_vec[1] > 0:
                             phy_vec = physics.resolve_collision(self, entity)
-                            if not phy_vec:
+                            if not phy_vec: #sometimes phy_vec returns false
                                 self.vel -= res_vec
                         else:
                             self.vel -= res_vec

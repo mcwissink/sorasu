@@ -4,6 +4,11 @@ Author: Mark Wissink
 
 Sorasu was a learning project for programming in Python, it is a very simple game with some advanced features
 
+
+Controls
+	Game - Arrow keys and z
+	Editor - WASD and mouse
+
 ------Features to note-------
 custom physics library - makes use of the SAT Theorem to detect/resolve collisions.		
 -physics.py

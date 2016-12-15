@@ -27,7 +27,7 @@ class Enemy(DynamicObject):
         self.jump_height = self.jump * 50
         self.max_vel = 200*self.speed
         self.accel = 100*self.speed
-        self.radius = self.engage * 100
+        self.radius = self.engage * 50
         #stuff for ai movement
         self.offset = (0, 0)
         self.timer = 100

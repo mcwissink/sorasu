@@ -28,7 +28,7 @@ class MenuState():
             self.title_font = pygame.font.SysFont(None, 150)
             self.button_font = pygame.font.SysFont(None, 50)
         #draw logo
-        self.logo_text = self.title_font.render('Sorasu', 1, (0,0,0))
+        self.logo_text = self.title_font.render('Safari', 1, (0,0,0))
         self.logo_x, self.logo_y = (0,0)
         self.gameButton = button.Button(75, 75, self.button_font, (0,0,0), 100, 'Game',(0.5,0.5), True)
         def onGameClick():

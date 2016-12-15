@@ -17,13 +17,13 @@ class Player(DynamicObject):
         self.max_vel = 3000
         self.accel = 2000
         self.past_up = self.past_down = self.past_left = self.past_right = True # Past key presses
-        self.dash_time = 40 #time spend dashing
-        self.dash_cool_down = 50 #time until dash can be used
+        self.dash_time = 15 #time spend dashing
+        self.dash_cool_down = 100 #time until dash can be used
         self.dash_timer = 0 #timer for dash
-        self.dash_boost = 1000 #amount of boost recieved
+        self.dash_boost = 2000 #amount of boost recieved
         self.can_dash = True
         self.deadly = False
-        self.health = 100
+        self.health = 25
         
     def input(self, keys, dt):
         '''Takes input to check for keypresses(dictionary)'''  
@@ -81,7 +81,7 @@ class Player(DynamicObject):
     def draw(self, screen, camera):
         DynamicObject.draw(self, screen, camera)
         #draw the health bar and dash bar
-        pygame.draw.rect(screen, (200,0,0), (10, 10, max(0, 100 * (self.health/100)), 10), 0)
+        pygame.draw.rect(screen, (200,0,0), (10, 10, max(0, 100 * (self.health/25)), 10), 0)
         pygame.draw.rect(screen, (0,0,0), (10, 10, 100, 10), 2)
         pygame.draw.rect(screen, (0,0,200), (10, 30, 100/(1+(self.dash_timer/self.dash_cool_down)), 10), 0)
         pygame.draw.rect(screen, (0,0,0), (10, 30, 100, 10), 2) 
@@ -90,8 +90,10 @@ class Player(DynamicObject):
         '''dashes the character in a direction, its is also an attack'''
         if x:
             self.vel.x = self.dash_boost * x
+            self.vel.y = 0
         if y:
             self.vel.y = self.dash_boost * y
+            self.vel.x = 0
         self.can_dash = False
         self.deadly = True
         self.color = self.color = (255,0,0)
