@@ -68,7 +68,7 @@ class SceneryObject(GameObject):
     ATTRIBUTES = [{'name': 'Parallax', 'init': 1, 'max': 2, 'min': 0, 'step': 0.01},
                   {'name': 'Scale', 'init': 1, 'max': 2, 'min': 0.1, 'step': 0.1},
                   {'name': 'Rotation', 'init': 0, 'max': 360, 'min': 0, 'step': 5},
-                  {'name': 'Image', 'init': -1, 'max': 1, 'min': -1, 'step': 1}] #always make sure parallax is first
+                  {'name': 'Image', 'init': -1, 'max': 2, 'min': -1, 'step': 1}] #always make sure parallax is first
     def __init__(self, texture_cache, x, y, offsets, attributes):
         '''scenery objects are for effects and stuff'''
         GameObject.__init__(self, x, y, offsets)
