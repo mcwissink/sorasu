@@ -16,7 +16,7 @@ def main():
     pygame.init() #initiate pygame
     screen = pygame.display.set_mode((900, 600), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
     clock = pygame.time.Clock() #initiates clock for time usage, such as deltatime and fps
-    pygame.display.set_caption('Safari') #set tdhe title of the application
+    pygame.display.set_caption('Sorasu') #set tdhe title of the application
     pygame.display.set_icon(utilities.load('icon.png')) #set image for application
     states = [MenuState, GameState, EditorState] #used for switching states within states
     currentState = MenuState(states)
