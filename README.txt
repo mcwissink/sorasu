@@ -2,8 +2,7 @@ Game: Sorasu
 Version: 1.0
 Author: Mark Wissink
 
-Sorasu was a learning project for programming in Python, it is a very simple game with some advanced features
-
+Sorasu was a learning project for programming in Python using pygame, it is a very simple game with some advanced features
 
 Controls
 	Game - Arrow keys and z
